@@ -1,6 +1,6 @@
 # Put Island Days online
 
-Island Days is ready for Cloudflare Pages. The included data was fetched directly from https://publicholidays.lk/ on 13 November 2026. There are 76 holiday entries for 2026–2028. Multiple holidays may share a date. The source currently marks 2027 and 2028 as estimates; the website and calendar downloads preserve that label.
+Island Days is ready for Cloudflare Pages. The included data was fetched from the Central Bank of Sri Lanka holiday lists (https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026 and the 2027 page) on 13 November 2026: 51 public holidays for 2026–2027, each marked as a bank and/or mercantile holiday as gazetted. Multiple holidays may share a date.
 
 The maintained calendar is live at **https://dayoff.itsnooblk.com/**. The repository is connected to Cloudflare Pages: pushes to `main` deploy the saved calendar, and monthly or manual runs refresh the source before deploying. The instructions below are a reference for setting up a separate deployment.
 
@@ -50,7 +50,7 @@ The workflow requests repository contents write access so it can save refreshed 
 
 Open **Actions → Update holidays and deploy → Run workflow**, choose **main**, and start it. If Actions are disabled for the repository or a fork, enable them first.
 
-A successful monthly or manual run fetches PublicHolidays.lk, validates the source, runs the tests, builds the website, saves the checked data, and publishes it to Cloudflare Pages. Pushes to `main` test, build, and deploy the saved dataset without fetching the source, so a source outage does not block a site change. Cloudflare will show your actual `pages.dev` address.
+A successful monthly or manual run fetches the Central Bank holiday lists, validates them, runs the tests, builds the website, saves the checked data, and publishes it to Cloudflare Pages. Pushes to `main` test, build, and deploy the saved dataset without fetching the source, so a source outage does not block a site change. Cloudflare will show your actual `pages.dev` address.
 
 Until all three Cloudflare settings are present, the workflow runs the tests and builds the saved calendar, and skips fetching and publishing with a “Cloudflare setup pending” summary. A green check alone does not mean a deployment occurred; check the deployment step and Cloudflare dashboard.
 
@@ -62,7 +62,7 @@ The updater retries connection and HTTP failures up to three times. It checks da
 
 The site displays the **last successful check**, rather than a claim that it is always up to date. After 45 days it labels the update overdue. Monitor failed runs in GitHub Actions and enable your GitHub workflow-failure notifications. If the source blocks automated requests or changes its page layout, review the parser before running again. Do not bypass a challenge page.
 
-Past years remain available when the source rolls forward. Newly published years are discovered automatically. Future years still marked as estimates stay labelled. The “Other public holidays” filter excludes the Poya days highlighted by the separate filter; both categories are public holidays.
+Past years remain available when the source rolls forward. A new year is added automatically once the Central Bank publishes its gazetted list. The “Other public holidays” filter excludes the Poya days highlighted by the separate filter; both categories are public holidays.
 
 ## Quick upload without automatic updates
 
@@ -107,17 +107,17 @@ Use your own exact project name if different. `npm run build` intentionally uses
 | `src/app.js` | Views, filters, search, dialogs, downloads |
 | `src/calendar.js` | Sri Lanka dates, long weekends, iCalendar export |
 | `public/data/holidays.json` | Last successfully fetched dataset |
-| `scripts/holidays.mjs` | Source parser and validation |
+| `scripts/holidays.mjs` | Central Bank list parser and validation |
 | `scripts/refresh.mjs` | Fetch, retry, and atomic data replacement |
 | `.github/workflows/update-and-deploy.yml` | Monthly refresh and Cloudflare deployment |
 
-Calendar downloads are one-time `.ics` imports. Import them into Apple Calendar, Google Calendar, or Outlook; they are not a live subscription. Export again after dates change. Long weekends assume Saturday and Sunday are non-working days and require no extra leave. The total counts distinct holiday dates, so two holidays on the same day count once.
+Calendar downloads are one-time `.ics` imports; subscribe to `/holidays.ics` for live updates. Long weekends follow each visitor's "My days off" settings (Saturday–Sunday by default) and require no extra leave. The total counts distinct holiday dates, so two holidays on the same day count once.
 
 This is an independent project with attribution and source links. Check the source's terms for your intended use, and verify dates before making bookings. No analytics, external fonts, or visitor tracking are included.
 
 ## Official references
 
-- [Holiday source](https://publicholidays.lk/)
+- [Holiday source: Central Bank of Sri Lanka bank holidays](https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026)
 - [Cloudflare Pages Direct Upload](https://developers.cloudflare.com/pages/get-started/direct-upload/)
 - [Cloudflare Pages continuous deployment and API-token setup](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/)
 - [GitHub scheduled-workflow behaviour](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)

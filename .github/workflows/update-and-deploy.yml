@@ -47,7 +47,7 @@ jobs:
             echo 'Calendar checks still run. Add the Cloudflare secrets and project variable described in DEPLOYMENT.md, then run this workflow again to enable monthly updates and publishing.' >> "$GITHUB_STEP_SUMMARY"
           fi
       - run: npm ci --no-audit --no-fund
-      - name: Fetch and validate holiday source
+      - name: Fetch and validate Central Bank holiday lists
         if: steps.settings.outputs.ready == 'true' && github.event_name != 'push'
         run: npm run refresh
       - run: npm test

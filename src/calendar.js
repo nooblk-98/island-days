@@ -35,7 +35,7 @@ export function longWeekends(holidays, year, { weekend = [0, 6] } = {}) {
 // Bank / mercantile status per the Central Bank of Sri Lanka holiday lists (gazetted under the Holidays Act No. 29 of 1971).
 // Every gazetted holiday is a bank holiday; only these are also mercantile (private-sector) holidays.
 const MERCANTILE = [/thai pongal/, /^(national|independence) day/, /^day prior to sinhala/, /^sinhala (&|and) tamil new year/, /^may day/, /^day following vesak/, /milad/, /christmas/];
-const BANK = [/full moon poya/, /mahasiv/, /^e?id[ -]ul[ -]?(fitr|alha|adha|allah)/, /good friday/, /deepa[vw]ali/, ...MERCANTILE];
+const BANK = [/full moon poya/, /mahasiv/, /^e?id[ -]ul[ -]?(fitr|al+a?ha|adha|allah)/, /good friday/, /deepa[vw]ali/, ...MERCANTILE];
 // Accepts a holiday (official flags from the Central Bank list win) or a bare name (rules above).
 export function holidayClass(holiday) {
   if (typeof holiday === 'object' && typeof holiday.bank === 'boolean') return { bank: holiday.bank, mercantile: holiday.mercantile === true };

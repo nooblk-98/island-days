@@ -19,7 +19,7 @@
 
 Island Days brings Sri Lanka’s public holidays into a calm, easy-to-explore calendar. A warm green-and-cream palette, clear date highlights, and responsive layouts make it useful whether you are planning the year ahead or looking for your next day off.
 
-The project is maintained by [nooblk-98](https://github.com/nooblk-98), with holiday dates sourced from [PublicHolidays.lk](https://publicholidays.lk/) and checked against the [Central Bank of Sri Lanka](https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026) holiday list.
+The project is maintained by [nooblk-98](https://github.com/nooblk-98), with holiday dates from the [Central Bank of Sri Lanka](https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026) holiday list, which follows the gazette issued under the Holidays Act No. 29 of 1971.
 
 ## Features
 
@@ -35,12 +35,12 @@ The project is maintained by [nooblk-98](https://github.com/nooblk-98), with hol
 - **Live calendar subscriptions** — subscribe to [`/holidays.ics`](https://dayoff.itsnooblk.com/holidays.ics) or [`/holidays-mercantile.ics`](https://dayoff.itsnooblk.com/holidays-mercantile.ics) in Apple Calendar, Outlook or Google Calendar and receive updates automatically.
 - **Calendar downloads** — export a single holiday or a full year as a one-time `.ics` import.
 - **Search-friendly** — a 1200×630 link preview (`npm run og` regenerates it from `scripts/og.html`), `robots.txt`, `sitemap.xml`, and structured data for upcoming holidays. Set `SITE_URL` when building for another domain.
-- **Transparent data status** — last-checked dates, source links, estimate labels, and overdue-update notices.
+- **Transparent data status** — last-checked dates, source links, and overdue-update notices.
 - **Responsive and accessible** — phone-friendly layouts, keyboard focus, accessible dialogs, reduced-motion support, and print styling.
 
 ## Maintained, with care
 
-Every push to `main` builds, checks, and deploys the calendar to Cloudflare Pages. A monthly GitHub Actions run refreshes and validates the source data before publishing; the same refresh can be run manually. Each refresh also reads the Central Bank's list for the current and later years, copies its bank and mercantile codes onto matching holidays, and logs a warning for any date the two sources disagree on. If the bank's page is unavailable, the previous month's codes are kept. Failed refreshes leave the current live calendar available, and past years remain available as the source rolls forward.
+Every push to `main` builds, checks, and deploys the calendar to Cloudflare Pages. A monthly GitHub Actions run reads the Central Bank's list for the current year and the next two, validates every date and weekday, and publishes the result; the same refresh can be run manually. A year appears as soon as the bank publishes its gazetted list, usually around the middle of the previous year. The current year is required; failed refreshes leave the current live calendar available, and past years remain available as the source rolls forward.
 
 Dates use **Asia/Colombo**, independently of the visitor’s browser timezone. Poya days are public holidays and are highlighted separately. Year totals count distinct dates, including days with more than one holiday.
 
@@ -51,4 +51,4 @@ Dates use **Asia/Colombo**, independently of the visitor’s browser timezone. P
 A static website with no frontend framework, database, visitor accounts, analytics, or external fonts.
 
 > [!NOTE]
-> Holiday dates may change. Years marked as estimates preserve the source’s status. Verify dates and working arrangements before booking. Downloads are one-time imports; use a subscription to receive changes. Holidays not on the Central Bank's list yet are classified by name, so a newly declared special holiday shows as a public holiday only until the bank lists it.
+> The government can declare or move holidays after the gazette, and the calendar picks up changes when the Central Bank updates its list. Verify dates and working arrangements before booking. Downloads are one-time imports; use a subscription to receive changes.

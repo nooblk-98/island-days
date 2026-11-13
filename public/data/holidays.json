@@ -1,19 +1,15 @@
 {
   "schemaVersion": 1,
-  "source": "https://publicholidays.lk/",
-  "fetchedAt": "2026-11-13T13:27:18.862Z",
+  "source": "https://www.cbsl.gov.lk/",
+  "fetchedAt": "2026-11-13T13:39:20.783Z",
   "years": {
     "2026": {
       "estimated": false,
-      "sourceUrl": "https://publicholidays.lk/#2026-public-holidays"
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     "2027": {
-      "estimated": true,
-      "sourceUrl": "https://publicholidays.lk/#2027-public-holidays"
-    },
-    "2028": {
-      "estimated": true,
-      "sourceUrl": "https://publicholidays.lk/#2028-public-holidays"
+      "estimated": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     }
   },
   "holidays": [
@@ -22,628 +18,459 @@
       "date": "2026-01-03",
       "name": "Duruthu Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-01-15-tamil-thai-pongal-day",
       "date": "2026-01-15",
       "name": "Tamil Thai Pongal Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/tamil-thai-pongal-day/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-02-01-navam-full-moon-poya-day",
       "date": "2026-02-01",
       "name": "Navam Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
-      "id": "2026-02-04-national-day",
+      "id": "2026-02-04-independence-day",
       "date": "2026-02-04",
-      "name": "National Day",
+      "name": "Independence Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/national-day/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-02-15-mahasivarathri-day",
       "date": "2026-02-15",
       "name": "Mahasivarathri Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/mahasivarathri-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
-      "id": "2026-03-02-madin-full-moon-poya-day",
+      "id": "2026-03-02-medin-full-moon-poya-day",
       "date": "2026-03-02",
-      "name": "Madin Full Moon Poya Day",
+      "name": "Medin Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
-      "id": "2026-03-21-id-ul-fitr",
+      "id": "2026-03-21-id-ul-fitre-ramazan-festival-day",
       "date": "2026-03-21",
-      "name": "Id Ul-Fitr",
+      "name": "Id-Ul-Fitre (Ramazan Festival Day)",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/id-ul-fitr/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-04-01-bak-full-moon-poya-day",
       "date": "2026-04-01",
       "name": "Bak Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-04-03-good-friday",
       "date": "2026-04-03",
       "name": "Good Friday",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/easter/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-04-13-day-prior-to-sinhala-tamil-new-year-day",
       "date": "2026-04-13",
       "name": "Day prior to Sinhala & Tamil New Year Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/sinhala-and-tamil-new-year/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-04-14-sinhala-tamil-new-year-day",
       "date": "2026-04-14",
       "name": "Sinhala & Tamil New Year Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/sinhala-and-tamil-new-year/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
-      "id": "2026-05-01-may-day",
+      "id": "2026-05-01-may-day-international-workers-day",
       "date": "2026-05-01",
-      "name": "May Day",
+      "name": "May Day (International Workers’ Day)",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/may-day/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-05-01-vesak-full-moon-poya-day",
       "date": "2026-05-01",
       "name": "Vesak Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/vesak-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-05-02-day-following-vesak-full-moon-poya-day",
       "date": "2026-05-02",
       "name": "Day following Vesak Full Moon Poya Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/vesak-day/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
-      "id": "2026-05-28-id-ul-alha",
+      "id": "2026-05-28-id-ul-allah-hadji-festival-day",
       "date": "2026-05-28",
-      "name": "Id Ul-Alha",
+      "name": "Id-Ul-Allah (Hadji Festival Day)",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/id-ul-alha/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-05-30-adhi-poson-full-moon-poya-day",
       "date": "2026-05-30",
       "name": "Adhi Poson Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-06-29-poson-full-moon-poya-day",
       "date": "2026-06-29",
       "name": "Poson Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-07-29-esala-full-moon-poya-day",
       "date": "2026-07-29",
       "name": "Esala Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
-      "id": "2026-08-26-milad-un-nabi",
+      "id": "2026-08-26-milad-un-nabi-holy-prophet-s-birthday",
       "date": "2026-08-26",
-      "name": "Milad un-Nabi",
+      "name": "Milad-Un-Nabi (Holy Prophet's Birthday)",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/milad-un-nabi/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-08-27-nikini-full-moon-poya-day",
       "date": "2026-08-27",
       "name": "Nikini Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-09-26-binara-full-moon-poya-day",
       "date": "2026-09-26",
       "name": "Binara Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-10-25-vap-full-moon-poya-day",
       "date": "2026-10-25",
       "name": "Vap Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
-      "id": "2026-11-08-deepavali",
+      "id": "2026-11-08-deepawali-festival-day",
       "date": "2026-11-08",
-      "name": "Deepavali",
+      "name": "Deepawali Festival Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/deepavali/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-11-24-ill-full-moon-poya-day",
       "date": "2026-11-24",
       "name": "Ill Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
-      "id": "2026-12-23-unduvap-full-moon-poya-day",
+      "id": "2026-12-23-unduwap-full-moon-poya-day",
       "date": "2026-12-23",
-      "name": "Unduvap Full Moon Poya Day",
+      "name": "Unduwap Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2026-12-25-christmas-day",
       "date": "2026-12-25",
       "name": "Christmas Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/christmas/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
       "id": "2027-01-15-tamil-thai-pongal-day",
       "date": "2027-01-15",
       "name": "Tamil Thai Pongal Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/tamil-thai-pongal-day/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-01-22-duruthu-full-moon-poya-day",
       "date": "2027-01-22",
       "name": "Duruthu Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
-      "id": "2027-02-04-national-day",
+      "id": "2027-02-04-independence-day",
       "date": "2027-02-04",
-      "name": "National Day",
+      "name": "Independence Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/national-day/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-02-20-navam-full-moon-poya-day",
       "date": "2027-02-20",
       "name": "Navam Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-03-06-mahasivarathri-day",
       "date": "2027-03-06",
       "name": "Mahasivarathri Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/mahasivarathri-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
-      "id": "2027-03-10-id-ul-fitr",
+      "id": "2027-03-10-eid-ul-fitr-ramazan-festival-day",
       "date": "2027-03-10",
-      "name": "Id Ul-Fitr",
+      "name": "Eid-Ul-Fitr (Ramazan Festival Day)",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/id-ul-fitr/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
-      "id": "2027-03-21-madin-full-moon-poya-day",
-      "date": "2027-03-21",
-      "name": "Madin Full Moon Poya Day",
+      "id": "2027-03-22-medin-full-moon-poya-day",
+      "date": "2027-03-22",
+      "name": "Medin Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/"
+      "bank": true,
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-03-26-good-friday",
       "date": "2027-03-26",
       "name": "Good Friday",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/easter/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-04-13-day-prior-to-sinhala-tamil-new-year-day",
       "date": "2027-04-13",
       "name": "Day prior to Sinhala & Tamil New Year Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/sinhala-and-tamil-new-year/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-04-14-sinhala-tamil-new-year-day",
       "date": "2027-04-14",
       "name": "Sinhala & Tamil New Year Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/sinhala-and-tamil-new-year/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-04-20-bak-full-moon-poya-day",
       "date": "2027-04-20",
       "name": "Bak Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
-      "id": "2027-05-01-may-day",
+      "id": "2027-05-01-may-day-international-workers-day",
       "date": "2027-05-01",
-      "name": "May Day",
+      "name": "May Day (International Workers’ Day)",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/may-day/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
-      "id": "2027-05-17-id-ul-alha",
+      "id": "2027-05-17-eid-ul-allha-hadji-festival-day",
       "date": "2027-05-17",
-      "name": "Id Ul-Alha",
+      "name": "Eid-Ul-Allha (Hadji Festival Day)",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/id-ul-alha/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
-      "id": "2027-05-20-vesak-full-moon-poya-day",
-      "date": "2027-05-20",
+      "id": "2027-05-19-vesak-full-moon-poya-day",
+      "date": "2027-05-19",
       "name": "Vesak Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/vesak-day/"
+      "bank": true,
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
-      "id": "2027-05-21-day-following-vesak-full-moon-poya-day",
-      "date": "2027-05-21",
+      "id": "2027-05-20-day-following-vesak-full-moon-poya-day",
+      "date": "2027-05-20",
       "name": "Day following Vesak Full Moon Poya Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/vesak-day/"
+      "bank": true,
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-06-18-poson-full-moon-poya-day",
       "date": "2027-06-18",
       "name": "Poson Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-07-18-esala-full-moon-poya-day",
       "date": "2027-07-18",
       "name": "Esala Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
-      "id": "2027-08-15-milad-un-nabi",
+      "id": "2027-08-15-milad-un-nabi-holy-prophet-s-birthday",
       "date": "2027-08-15",
-      "name": "Milad un-Nabi",
+      "name": "Milad-Un-Nabi (Holy Prophet's Birthday)",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/milad-un-nabi/",
       "bank": true,
-      "mercantile": true
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-08-16-nikini-full-moon-poya-day",
       "date": "2027-08-16",
       "name": "Nikini Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-09-15-binara-full-moon-poya-day",
       "date": "2027-09-15",
       "name": "Binara Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-10-15-vap-full-moon-poya-day",
       "date": "2027-10-15",
       "name": "Vap Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
-      "id": "2027-10-28-deepavali",
+      "id": "2027-10-28-deepawali-festival-day",
       "date": "2027-10-28",
-      "name": "Deepavali",
+      "name": "Deepawali Festival Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/deepavali/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-11-13-ill-full-moon-poya-day",
       "date": "2027-11-13",
       "name": "Ill Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
-      "id": "2027-12-13-unduvap-full-moon-poya-day",
+      "id": "2027-12-13-unduwap-full-moon-poya-day",
       "date": "2027-12-13",
-      "name": "Unduvap Full Moon Poya Day",
+      "name": "Unduwap Full Moon Poya Day",
       "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/",
       "bank": true,
-      "mercantile": false
+      "mercantile": false,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
       "id": "2027-12-25-christmas-day",
       "date": "2027-12-25",
       "name": "Christmas Day",
       "type": "public",
-      "sourceUrl": "https://publicholidays.lk/christmas/",
       "bank": true,
-      "mercantile": true
-    },
-    {
-      "id": "2028-01-12-duruthu-full-moon-poya-day",
-      "date": "2028-01-12",
-      "name": "Duruthu Full Moon Poya Day",
-      "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/"
-    },
-    {
-      "id": "2028-01-14-tamil-thai-pongal-day",
-      "date": "2028-01-14",
-      "name": "Tamil Thai Pongal Day",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/tamil-thai-pongal-day/"
-    },
-    {
-      "id": "2028-02-04-national-day",
-      "date": "2028-02-04",
-      "name": "National Day",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/national-day/"
-    },
-    {
-      "id": "2028-02-23-mahasivarathri-day",
-      "date": "2028-02-23",
-      "name": "Mahasivarathri Day",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/mahasivarathri-day/"
-    },
-    {
-      "id": "2028-02-25-navam-full-moon-poya-day",
-      "date": "2028-02-25",
-      "name": "Navam Full Moon Poya Day",
-      "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/"
-    },
-    {
-      "id": "2028-02-26-id-ul-fitr",
-      "date": "2028-02-26",
-      "name": "Id Ul-Fitr",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/id-ul-fitr/"
-    },
-    {
-      "id": "2028-03-25-madin-full-moon-poya-day",
-      "date": "2028-03-25",
-      "name": "Madin Full Moon Poya Day",
-      "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/"
-    },
-    {
-      "id": "2028-04-13-day-prior-to-sinhala-tamil-new-year-day",
-      "date": "2028-04-13",
-      "name": "Day prior to Sinhala & Tamil New Year Day",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/sinhala-and-tamil-new-year/"
-    },
-    {
-      "id": "2028-04-14-good-friday",
-      "date": "2028-04-14",
-      "name": "Good Friday",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/easter/"
-    },
-    {
-      "id": "2028-04-14-sinhala-tamil-new-year-day",
-      "date": "2028-04-14",
-      "name": "Sinhala & Tamil New Year Day",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/sinhala-and-tamil-new-year/"
-    },
-    {
-      "id": "2028-04-24-bak-full-moon-poya-day",
-      "date": "2028-04-24",
-      "name": "Bak Full Moon Poya Day",
-      "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/"
-    },
-    {
-      "id": "2028-05-01-may-day",
-      "date": "2028-05-01",
-      "name": "May Day",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/may-day/"
-    },
-    {
-      "id": "2028-05-05-id-ul-alha",
-      "date": "2028-05-05",
-      "name": "Id Ul-Alha",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/id-ul-alha/"
-    },
-    {
-      "id": "2028-05-23-vesak-full-moon-poya-day",
-      "date": "2028-05-23",
-      "name": "Vesak Full Moon Poya Day",
-      "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/vesak-day/"
-    },
-    {
-      "id": "2028-05-24-day-following-vesak-full-moon-poya-day",
-      "date": "2028-05-24",
-      "name": "Day following Vesak Full Moon Poya Day",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/vesak-day/"
-    },
-    {
-      "id": "2028-06-22-poson-full-moon-poya-day",
-      "date": "2028-06-22",
-      "name": "Poson Full Moon Poya Day",
-      "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/"
-    },
-    {
-      "id": "2028-07-21-esala-full-moon-poya-day",
-      "date": "2028-07-21",
-      "name": "Esala Full Moon Poya Day",
-      "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/"
-    },
-    {
-      "id": "2028-08-03-milad-un-nabi",
-      "date": "2028-08-03",
-      "name": "Milad un-Nabi",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/milad-un-nabi/"
-    },
-    {
-      "id": "2028-08-20-nikini-full-moon-poya-day",
-      "date": "2028-08-20",
-      "name": "Nikini Full Moon Poya Day",
-      "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/"
-    },
-    {
-      "id": "2028-09-18-binara-full-moon-poya-day",
-      "date": "2028-09-18",
-      "name": "Binara Full Moon Poya Day",
-      "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/"
-    },
-    {
-      "id": "2028-10-17-deepavali",
-      "date": "2028-10-17",
-      "name": "Deepavali",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/deepavali/"
-    },
-    {
-      "id": "2028-10-18-vap-full-moon-poya-day",
-      "date": "2028-10-18",
-      "name": "Vap Full Moon Poya Day",
-      "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/"
-    },
-    {
-      "id": "2028-11-16-ill-full-moon-poya-day",
-      "date": "2028-11-16",
-      "name": "Ill Full Moon Poya Day",
-      "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/"
-    },
-    {
-      "id": "2028-12-15-unduvap-full-moon-poya-day",
-      "date": "2028-12-15",
-      "name": "Unduvap Full Moon Poya Day",
-      "type": "poya",
-      "sourceUrl": "https://publicholidays.lk/poya-day/"
-    },
-    {
-      "id": "2028-12-25-christmas-day",
-      "date": "2028-12-25",
-      "name": "Christmas Day",
-      "type": "public",
-      "sourceUrl": "https://publicholidays.lk/christmas/"
+      "mercantile": true,
+      "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     }
   ]
 }

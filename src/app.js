@@ -37,7 +37,7 @@ function openDialog(content, kind = '', holiday = '') {
 function showHoliday(id) {
   const h = data.holidays.find(holiday => holiday.id === id);
   if (!h) return;
-  openDialog(`<span class="dialog-symbol" aria-hidden="true">${h.type === 'poya' ? '☾' : '✳'}</span><span class="dialog-tag ${h.type}">${typeLabel(h)}</span><h2 class="dialog-heading" id="dialog-title">${esc(h.name)}</h2><p class="dialog-date">${formatDate(h.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · Sri Lanka</p>${isEstimated(h.date.slice(0, 4)) ? '<p class="notice">This date is an estimate from the source and may change.</p>' : ''}${classNote(h)}<p class="dialog-body">A little room to slow down. Check the source for the latest details before making plans.</p><button class="dialog-action" data-download="${esc(h.id)}">↓ Add to my calendar</button><a class="dialog-source" href="${esc(h.sourceUrl)}" target="_blank" rel="noopener noreferrer">Read more at PublicHolidays.lk ↗</a>`, 'holiday', h.id);
+  openDialog(`<span class="dialog-symbol" aria-hidden="true">${h.type === 'poya' ? '☾' : '✳'}</span><span class="dialog-tag ${h.type}">${typeLabel(h)}</span><h2 class="dialog-heading" id="dialog-title">${esc(h.name)}</h2><p class="dialog-date">${formatDate(h.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · Sri Lanka</p>${isEstimated(h.date.slice(0, 4)) ? '<p class="notice">This date is an estimate from the source and may change.</p>' : ''}${classNote(h)}<p class="dialog-body">A little room to slow down. Check the source for the latest details before making plans.</p><button class="dialog-action" data-download="${esc(h.id)}">↓ Add to my calendar</button><a class="dialog-source" href="${esc(h.sourceUrl)}" target="_blank" rel="noopener noreferrer">Central Bank holiday list ↗</a>`, 'holiday', h.id);
 }
 function classNote(h) {
   const kind = holidayClass(h);
@@ -289,7 +289,7 @@ $('#theme-toggle').onclick = () => { window.islandTheme?.toggle(); syncThemeButt
 syncThemeButton();
 $('#prefs-button').onclick =() => { if (data) openDialog(settingsContent(), 'settings'); };
 $('#subscribe').onclick = () => openDialog(subscribeContent());
-$('#about').onclick =() => openDialog('<span class="dialog-symbol" aria-hidden="true">✳</span><h2 id="dialog-title" class="dialog-heading">For a little more living.</h2><p class="dialog-body">Island Days is an independent calendar for Sri Lanka’s public holidays. Find Poya days, plan a long weekend, and save the year to your favourite calendar.</p><p class="dialog-body">Holiday dates are sourced from PublicHolidays.lk and checked against the Central Bank of Sri Lanka’s holiday list, which also says which days are bank and mercantile holidays. The calendar displays the last successful data check; estimated years are labelled. Poya days are public holidays too, and are highlighted separately for easy browsing.</p><p class="dialog-body">All dates use the Sri Lanka calendar day (Asia/Colombo). Holiday dates and working arrangements can change. Verify with the source or your employer before making plans.</p><a class="dialog-action" href="https://publicholidays.lk/" target="_blank" rel="noopener noreferrer">Visit the source ↗</a>');
+$('#about').onclick =() => openDialog('<span class="dialog-symbol" aria-hidden="true">✳</span><h2 id="dialog-title" class="dialog-heading">For a little more living.</h2><p class="dialog-body">Island Days is an independent calendar for Sri Lanka’s public holidays. Find Poya days, plan a long weekend, and save the year to your favourite calendar.</p><p class="dialog-body">Holiday dates come from the Central Bank of Sri Lanka’s holiday list, which follows the government gazette and marks each day as a public, bank and/or mercantile holiday. A new year appears here once it has been gazetted. The calendar displays the last successful data check; estimated years are labelled. Poya days are public holidays too, and are highlighted separately for easy browsing.</p><p class="dialog-body">All dates use the Sri Lanka calendar day (Asia/Colombo). Holiday dates and working arrangements can change. Verify with the source or your employer before making plans.</p><a class="dialog-action" href="https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026" target="_blank" rel="noopener noreferrer">Visit the source ↗</a>');
 $('#close-dialog').onclick = () => $('#detail-dialog').close();
 $('#detail-dialog').addEventListener('close', () => {
   $('#detail-dialog').dataset.kind = ''; $('#detail-dialog').dataset.holiday = '';
@@ -311,13 +311,15 @@ async function init() {
     $('.data-line').classList.toggle('stale', stale);
     const checked = colomboToday(new Date(data.fetchedAt));
     $('#sync-status').textContent = `${stale ? 'Update overdue · Last checked' : 'Last checked'} ${formatDate(checked, { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    const sourceUrl = (data.years[thisYear] || data.years[availableYears.at(-1)])?.sourceUrl;
+    if (sourceUrl?.startsWith('https://www.cbsl.gov.lk/')) $('#source-link').href = sourceUrl;
     lastURL = `${location.pathname}${location.search}`;
     renderHero(); render();
     if (linkedHoliday) showHoliday(linkedHoliday);
   } catch (error) {
     console.error(error);
     data = undefined;
-    $('#calendar').innerHTML = '<div class="empty-state">Your calendar couldn’t load.<br><button class="dialog-action" id="retry">Try again</button><br>Or visit <a href="https://publicholidays.lk/">PublicHolidays.lk</a> for dates.</div>';
+    $('#calendar').innerHTML = '<div class="empty-state">Your calendar couldn’t load.<br><button class="dialog-action" id="retry">Try again</button><br>Or see the <a href="https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026">Central Bank holiday list</a>.</div>';
     $('#calendar').setAttribute('aria-busy', 'false');
     $('#retry').onclick = init;
     $('#sync-status').textContent = 'Calendar data is unavailable';
