@@ -51,9 +51,8 @@ const jsonLd = [
     { '@type': 'DataDownload', encodingFormat: 'text/calendar', contentUrl: `${site}/holidays.ics` }
   ] }
 ];
-const yearLinks = years.map(y => `<a href="${yearPath(y)}">Sri Lanka holidays ${y}</a>`).join('');
 const template = await readFile(new URL('../src/index.html', import.meta.url), 'utf8');
-const page = template.replaceAll('__SITE__', site).replaceAll('__TITLE__', esc(title)).replaceAll('__DESCRIPTION__', esc(description)).replace('__VERIFY__', verify).replace('__YEAR_LINKS__', yearLinks);
+const page = template.replaceAll('__SITE__', site).replaceAll('__TITLE__', esc(title)).replaceAll('__DESCRIPTION__', esc(description)).replace('__VERIFY__', verify);
 await writeFile(new URL('index.html', dist), page.replace('</head>', ldScript(jsonLd)));
 // The not-found page reuses the app but must never be indexed.
 await writeFile(new URL('404.html', dist), page.replace('content="index, follow, max-image-preview:large"', 'content="noindex"').replace(/\n  <link rel="canonical"[^>]*>/, ''));

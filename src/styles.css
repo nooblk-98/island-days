@@ -2274,17 +2274,6 @@ footer.site-footer {
     display: none;
   }
 }
-.footer-years {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-  margin-top: 12px;
-}
-.footer-years a {
-  font-size: 12px;
-  color: #5c6e51;
-  text-underline-offset: 3px;
-}
 .year-page .site-header {
   justify-content: space-between;
 }
@@ -2459,7 +2448,6 @@ footer.site-footer {
   color: var(--mercantile);
 }
 [data-theme="dark"] .crumbs a,
-[data-theme="dark"] .footer-years a,
 [data-theme="dark"] .year-main a,
 [data-theme="dark"] .year-page-cta {
   color: #b7c8a9;
@@ -3066,11 +3054,6 @@ dialog {
 .year-page .site-header {
   display: flex;
 }
-@media (max-width: 760px) {
-  .footer-years {
-    justify-content: center;
-  }
-}
 .break-days {
   white-space: nowrap;
   letter-spacing: 0.5px;
@@ -3412,7 +3395,7 @@ select:focus-visible {
   .holiday-scope .filter { flex: 1; padding: 10px 12px; justify-content: center; font-size: 13px; }
   .filter-toolbar { align-items: stretch; gap: 0; margin-bottom: 18px; }
   .cal { padding: 20px 7px 16px; }
-  .cal-grid { row-gap: 12px; grid-auto-rows: minmax(50px, 1fr); }
+  .cal-grid { row-gap: 14px; grid-auto-rows: minmax(64px, 1fr); }
   .cal-weekdays > span { font-size: 10px; }
   .legend { gap: 14px; width: 100%; }
   .legend-group { width: 100%; gap: 10px 13px; }
@@ -3471,15 +3454,6 @@ select:focus-visible {
   .cal .month-breaks { margin-top: 14px; padding-top: 14px; }
   .month-breaks .break-item { padding: 12px 14px; }
   .month-breaks .break-body { gap: 8px; }
-}
-@media (min-width: 361px) and (max-width: 600px) {
-  .cal { --dot: 44px; }
-  .cal .cal-dot { width: 44px; height: 44px; font-size: 16px; }
-  .cal-grid { grid-auto-rows: minmax(56px, 1fr); row-gap: 10px; }
-}
-@media (max-width: 360px) {
-  .cal { --dot: 36px; }
-  .cal .cal-dot { width: 36px; height: 36px; font-size: 15px; }
 }
 /* A focused calendar width; leave suggestions sit outside the date-grid card. */
 @media (min-width: 901px) {
