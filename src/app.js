@@ -1,4 +1,4 @@
-import { MONTHS, monthCells, colomboToday, formatDate, parseDate, daysBetween, longWeekends, createICS, createBreakICS, holidayClass, isMercantileDayOff, leavePlans, addDays, isWeekend } from './calendar.js';
+import { MONTHS, monthCells, colomboToday, formatDate, parseDate, daysBetween, longWeekends, createICS, createBreakICS, holidayClass, holidayDisplayName, isMercantileDayOff, leavePlans, addDays, isWeekend } from './calendar.js';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const today = colomboToday();
@@ -20,7 +20,7 @@ const yourLeavePlans = (from = '') => leavePlans(breakSource(), state.year, { fr
 const yearHolidays = () => data.holidays.filter(h => Number(h.date.slice(0, 4)) === state.year);
 const isMercantile = h => holidayClass(h).mercantile;
 const holidayScope = h => state.filter !== 'mercantile' || isMercantileDayOff(h);
-const matches = h => holidayScope(h) && h.name.toLowerCase().includes(state.search.toLowerCase());
+const matches = h => holidayScope(h) && holidayDisplayName(h).toLowerCase().includes(state.search.toLowerCase());
 const typeLabel = h => h.type === 'poya' ? 'Poya day' : 'Public holiday';
 const shortDate = (value, extra = {}) => formatDate(value, { day: 'numeric', month: 'short', ...extra });
 const isEstimated = year => data.years[year]?.estimated;
@@ -40,7 +40,7 @@ function openDialog(content, kind = '', holiday = '') {
 function showHoliday(id) {
   const h = data.holidays.find(holiday => holiday.id === id);
   if (!h) return;
-  openDialog(`<span class="dialog-symbol" aria-hidden="true">${h.type === 'poya' ? '☾' : '✳'}</span><span class="dialog-tag ${h.type}">${typeLabel(h)}</span><h2 class="dialog-heading" id="dialog-title">${esc(h.name)}</h2><p class="dialog-date">${formatDate(h.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · Sri Lanka</p>${isEstimated(h.date.slice(0, 4)) ? '<p class="notice">This date is an estimate from the source and may change.</p>' : ''}${classNote(h)}<p class="dialog-body">A little room to slow down. Check the source for the latest details before making plans.</p><button class="dialog-action" data-download="${esc(h.id)}">↓ Add to my calendar</button><a class="dialog-source" href="${esc(h.sourceUrl)}" target="_blank" rel="noopener noreferrer">Central Bank holiday list ↗</a>`, 'holiday', h.id);
+  openDialog(`<span class="dialog-symbol" aria-hidden="true">${h.type === 'poya' ? '☾' : '✳'}</span><span class="dialog-tag ${h.type}">${typeLabel(h)}</span><h2 class="dialog-heading" id="dialog-title">${esc(holidayDisplayName(h))}</h2><p class="dialog-date">${formatDate(h.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · Sri Lanka</p>${isEstimated(h.date.slice(0, 4)) ? '<p class="notice">This date is an estimate from the source and may change.</p>' : ''}${classNote(h)}<p class="dialog-body">A little room to slow down. Check the source for the latest details before making plans.</p><button class="dialog-action" data-download="${esc(h.id)}">↓ Add to my calendar</button><a class="dialog-source" href="${esc(h.sourceUrl)}" target="_blank" rel="noopener noreferrer">Central Bank holiday list ↗</a>`, 'holiday', h.id);
 }
 function classNote(h) {
   const kind = holidayClass(h);
@@ -54,7 +54,7 @@ function showDate(date) {
   openDialog(`<span class="dialog-symbol" aria-hidden="true">✳</span><h2 class="dialog-heading" id="dialog-title">${formatDate(date, { weekday: 'long', day: 'numeric', month: 'long' })}</h2><p class="dialog-body">${events.length} holidays fall on this day.</p><div class="holiday-list">${events.map(h => holidayRow(h)).join('')}</div>`);
 }
 function holidayRow(h, full = false) {
-  return `<button class="upcoming-item" data-holiday="${esc(h.id)}"><span class="date-tile ${h.type}"><b>${Number(h.date.slice(-2))}</b><small>${MONTHS[Number(h.date.slice(5, 7)) - 1].slice(0, 3).toUpperCase()}</small></span><span><span class="upcoming-title">${esc(h.name)}</span><span class="upcoming-meta">${formatDate(h.date, { weekday: 'long' })} · ${typeLabel(h)}${isEstimated(h.date.slice(0, 4)) ? ' · Estimated' : ''}</span></span>${full ? `<span class="list-type ${h.type}">${typeLabel(h)}</span>` : ''}<span class="upcoming-arrow" aria-hidden="true">↗</span></button>`;
+  return `<button class="upcoming-item" data-holiday="${esc(h.id)}"><span class="date-tile ${h.type}"><b>${Number(h.date.slice(-2))}</b><small>${MONTHS[Number(h.date.slice(5, 7)) - 1].slice(0, 3).toUpperCase()}</small></span><span><span class="upcoming-title">${esc(holidayDisplayName(h))}</span><span class="upcoming-meta">${formatDate(h.date, { weekday: 'long' })} · ${typeLabel(h)}${isEstimated(h.date.slice(0, 4)) ? ' · Estimated' : ''}</span></span>${full ? `<span class="list-type ${h.type}">${typeLabel(h)}</span>` : ''}<span class="upcoming-arrow" aria-hidden="true">↗</span></button>`;
 }
 function renderHero() {
   const next = breakSource().find(h => h.date >= today);
@@ -63,14 +63,14 @@ function renderHero() {
     return;
   }
   const delta = daysBetween(today, next.date);
-  $('#next-content').innerHTML = `<div class="next-date"><span class="next-day">${Number(next.date.slice(-2))}</span><span class="next-month">${MONTHS[Number(next.date.slice(5, 7)) - 1].slice(0, 3).toUpperCase()} ${next.date.slice(0, 4)}<br>${formatDate(next.date, { weekday: 'long' })}</span></div><h2 class="next-name">${esc(next.name)}</h2><span class="next-pill"><span aria-hidden="true">◷</span> ${delta === 0 ? 'A LITTLE PAUSE, TODAY' : `${delta} DAY${delta === 1 ? '' : 'S'} TO GO`}${isEstimated(next.date.slice(0, 4)) ? ' · ESTIMATED' : ''}</span>`;
+  $('#next-content').innerHTML = `<div class="next-date"><span class="next-day">${Number(next.date.slice(-2))}</span><span class="next-month">${MONTHS[Number(next.date.slice(5, 7)) - 1].slice(0, 3).toUpperCase()} ${next.date.slice(0, 4)}<br>${formatDate(next.date, { weekday: 'long' })}</span></div><h2 class="next-name">${esc(holidayDisplayName(next))}</h2><span class="next-pill"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 6v4h4"/></svg> ${delta === 0 ? 'A LITTLE PAUSE, TODAY' : `${delta} DAY${delta === 1 ? '' : 'S'} TO GO`}${isEstimated(next.date.slice(0, 4)) ? ' · ESTIMATED' : ''}</span>`;
   // The next long weekend (no leave needed), following the visitor's own work week and holidays.
   const source = breakSource();
   const nextBreak = availableYears.filter(y => y >= thisYear).flatMap(y => longWeekends(source, y, { weekend: weekendDays() })).find(w => w.end >= today);
   if (nextBreak) $('#next-content').insertAdjacentHTML('beforeend', `<p class="next-break"><span>Next long weekend</span><strong>${shortDate(nextBreak.start, { weekday: 'short' })} – ${shortDate(nextBreak.end, { weekday: 'short' })}</strong><em>${nextBreak.days} days off${nextBreak.start <= today ? ' · now' : ` · in ${daysBetween(today, nextBreak.start)} days`}</em></p>`);
   $('#next-holiday').disabled = false;
   $('#next-holiday').onclick = () => showHoliday(next.id);
-  $('#next-holiday').setAttribute('aria-label', `Next holiday: ${next.name}, ${formatDate(next.date)}`);
+  $('#next-holiday').setAttribute('aria-label', `Next holiday: ${holidayDisplayName(next)}, ${formatDate(next.date)}`);
 }
 // Days that belong to a long weekend, so the calendars can draw one band across each break.
 // Leave breaks (dashed) need one to three leave days; long weekends (solid) need none.
@@ -102,7 +102,7 @@ function breakContent(start) {
   if (!p) return '';
   const rows = [];
   for (let d = p.start; d <= p.end; d = addDays(d, 1)) {
-    const names = data.holidays.filter(h => h.date === d).map(h => esc(h.name));
+    const names = data.holidays.filter(h => h.date === d).map(h => esc(holidayDisplayName(h)));
     const isLeave = p.leaveDates.includes(d);
     const label = isLeave ? '<span class="day-kind leave">Take leave</span>' : names.length ? `<span class="day-kind holiday">${names.join(' · ')}</span>` : '<span class="day-kind weekend">Weekend</span>';
     rows.push(`<li class="${isLeave ? 'is-leave-day' : ''}"><span class="day-date">${formatDate(d, { weekday: 'short', day: 'numeric', month: 'short' })}</span>${label}</li>`);
@@ -133,7 +133,7 @@ function renderMonth() {
     const breakNote = info ? `, part of a ${info.days}-day long weekend` : '';
     if (plan?.isLeave) return `<div class="${day}"><button class="${cls}" data-break="${plan.start}"${current} aria-label="${esc(`Take leave on ${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${plan.days} days off for ${plan.leave} leave day${plan.leave === 1 ? '' : 's'}`)}">${cell.day}<span class="leave-badge" aria-hidden="true">Leave</span></button></div>`;
     if (!events.length) return `<div class="${day}"><span class="${cls}"${current}${info ? ` title="${info.days}-day long weekend"` : ''}>${cell.day}</span></div>`;
-    const names = events.map(h => h.name);
+    const names = events.map(h => holidayDisplayName(h));
     return `<div class="${day}"><button class="${cls}" data-date="${cell.date}"${current} aria-label="${esc(`${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${names.join(', ')}${breakNote}`)}">${cell.day}</button><span class="cal-name" aria-hidden="true">${esc(names.join(' · '))}</span></div>`;
   }).join('');
   $('#calendar').innerHTML = `<div class="cal${prefs.saturday ? ' works-saturday' : ''}"><div class="cal-weekdays">${weekdays}</div><div class="cal-grid">${days}</div>${monthBreaks()}</div>`;

@@ -289,14 +289,20 @@ main {
 }
 .next-pill {
   display: inline-flex;
-  gap: 7px;
+  gap: 8px;
   align-items: center;
   background: #42634e;
-  padding: 6px 11px;
+  padding: 8px 12px;
   border-radius: 30px;
   color: #e4ead9;
   font-size: 9px;
   letter-spacing: 1px;
+  line-height: 1;
+}
+.next-pill svg {
+  width: 13px;
+  height: 13px;
+  flex: none;
 }
 .next-art {
   position: absolute;
@@ -3193,7 +3199,7 @@ select:focus-visible {
 .reminder-switch {
   margin: 4px 0 2px;
 }
-.next-break {
+.next-card .next-break {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;

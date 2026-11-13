@@ -1,7 +1,7 @@
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { validateDataset } from './holidays.mjs';
-import { createICS, holidayClass, isMercantileDayOff, formatDate, longWeekends } from '../src/calendar.js';
+import { createICS, holidayClass, holidayDisplayName, isMercantileDayOff, formatDate, longWeekends } from '../src/calendar.js';
 const data = JSON.parse(await readFile(new URL('../public/data/holidays.json', import.meta.url), 'utf8'));
 validateDataset(data);
 const site = (process.env.SITE_URL || 'https://dayoff.itsnooblk.com').replace(/\/+$/, '');
@@ -70,7 +70,7 @@ for (const year of years) {
   const rows = list.map(h => {
     const kind = holidayClass(h);
     const tags = `<span class="tag ${h.type}">${h.type === 'poya' ? 'Poya day' : 'Public'}</span>${kind.mercantile ? '<span class="tag mercantile">Mercantile</span>' : ''}`;
-    return `        <tr><td><time datetime="${h.date}">${formatDate(h.date, { day: 'numeric', month: 'long' })}</time></td><td>${formatDate(h.date, { weekday: 'long' })}</td><td>${esc(h.name)}</td><td>${tags}</td></tr>`;
+    return `        <tr><td><time datetime="${h.date}">${formatDate(h.date, { day: 'numeric', month: 'long' })}</time></td><td>${formatDate(h.date, { weekday: 'long' })}</td><td>${esc(holidayDisplayName(h))}</td><td>${tags}</td></tr>`;
   }).join('\n');
   const weekendRows = breaks.map(w => `      <li><strong>${w.days} days</strong> ${formatDate(w.start, { weekday: 'long', day: 'numeric', month: 'long' })} to ${formatDate(w.end, { weekday: 'long', day: 'numeric', month: 'long' })}</li>`).join('\n');
   const others = years.filter(y => y !== year).map(y => `<a href="${yearPath(y)}">Sri Lanka holidays ${y}</a>`).join(' · ');
