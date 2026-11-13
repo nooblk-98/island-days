@@ -1,12 +1,22 @@
-import { MONTHS, monthCells, colomboToday, formatDate, parseDate, daysBetween, longWeekends, createICS, holidayClass, leavePlans, addDays } from './calendar.js';
+import { MONTHS, monthCells, colomboToday, formatDate, parseDate, daysBetween, longWeekends, createICS, createBreakICS, holidayClass, leavePlans, addDays, isWeekend } from './calendar.js';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const today = colomboToday();
 const thisYear = Number(today.slice(0, 4));
-let data, availableYears = [], focusedBeforeDialog, toastTimer, plannerMode = 'all';
+let data, availableYears = [], focusedBeforeDialog, toastTimer, lastURL = '';
 const state = { year: thisYear, month: Number(today.slice(5, 7)) - 1, view: 'month', filter: 'all', search: '' };
+// Personal settings, remembered in this browser only.
+const PREFS_KEY = 'island-days:prefs';
+const prefs = { holidays: 'all', saturday: false, maxLeave: 3 };
+try { Object.assign(prefs, JSON.parse(localStorage.getItem(PREFS_KEY)) || {}); } catch {}
+prefs.maxLeave = Math.min(5, Math.max(1, Number(prefs.maxLeave) || 3));
+const savePrefs = () => { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch {} };
+const weekendDays = () => prefs.saturday ? [0] : [0, 6];
+const breakSource = () => prefs.holidays === 'mercantile' || state.filter === 'mercantile' ? data.holidays.filter(isMercantile) : data.holidays;
+const yourLongWeekends = () => longWeekends(breakSource(), state.year, { weekend: weekendDays() });
+const yourLeavePlans = (from = '') => leavePlans(breakSource(), state.year, { from, weekend: weekendDays(), maxLeave: prefs.maxLeave });
 const yearHolidays = () => data.holidays.filter(h => Number(h.date.slice(0, 4)) === state.year);
-const isMercantile = h => holidayClass(h.name).mercantile;
+const isMercantile = h => holidayClass(h).mercantile;
 const matches = h => (state.filter === 'all' || (state.filter === 'mercantile' ? isMercantile(h) : h.type === state.filter)) && h.name.toLowerCase().includes(state.search.toLowerCase());
 const typeLabel = h => h.type === 'poya' ? 'Poya day' : 'Public holiday';
 const shortDate = (value, extra = {}) => formatDate(value, { day: 'numeric', month: 'short', ...extra });
@@ -15,20 +25,22 @@ function notify(message) {
   clearTimeout(toastTimer); $('#toast').textContent = message; $('#toast').hidden = false;
   toastTimer = setTimeout(() => { $('#toast').hidden = true; }, 4500);
 }
-function openDialog(content) {
+function openDialog(content, kind = '', holiday = '') {
   const dialog = $('#detail-dialog');
   if (!dialog.open) focusedBeforeDialog = document.activeElement;
   $('#dialog-content').innerHTML = content;
+  dialog.dataset.kind = kind; dialog.dataset.holiday = holiday;
   if (!dialog.open) dialog.showModal();
   $('#close-dialog').focus();
+  if (data) writeURL();
 }
 function showHoliday(id) {
   const h = data.holidays.find(holiday => holiday.id === id);
   if (!h) return;
-  openDialog(`<span class="dialog-symbol" aria-hidden="true">${h.type === 'poya' ? '☾' : '✳'}</span><span class="dialog-tag ${h.type}">${typeLabel(h)}</span><h2 class="dialog-heading" id="dialog-title">${esc(h.name)}</h2><p class="dialog-date">${formatDate(h.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · Sri Lanka</p>${isEstimated(h.date.slice(0, 4)) ? '<p class="notice">This date is an estimate from the source and may change.</p>' : ''}${classNote(h)}<p class="dialog-body">A little room to slow down. Check the source for the latest details before making plans.</p><button class="dialog-action" data-download="${esc(h.id)}">↓ Add to my calendar</button><a class="dialog-source" href="${esc(h.sourceUrl)}" target="_blank" rel="noopener noreferrer">Read more at PublicHolidays.lk ↗</a>`);
+  openDialog(`<span class="dialog-symbol" aria-hidden="true">${h.type === 'poya' ? '☾' : '✳'}</span><span class="dialog-tag ${h.type}">${typeLabel(h)}</span><h2 class="dialog-heading" id="dialog-title">${esc(h.name)}</h2><p class="dialog-date">${formatDate(h.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · Sri Lanka</p>${isEstimated(h.date.slice(0, 4)) ? '<p class="notice">This date is an estimate from the source and may change.</p>' : ''}${classNote(h)}<p class="dialog-body">A little room to slow down. Check the source for the latest details before making plans.</p><button class="dialog-action" data-download="${esc(h.id)}">↓ Add to my calendar</button><a class="dialog-source" href="${esc(h.sourceUrl)}" target="_blank" rel="noopener noreferrer">Read more at PublicHolidays.lk ↗</a>`, 'holiday', h.id);
 }
 function classNote(h) {
-  const kind = holidayClass(h.name);
+  const kind = holidayClass(h);
   const tags = ['Public', ...(kind.bank ? ['Bank'] : []), ...(kind.mercantile ? ['Mercantile'] : [])].map(t => `<span class="class-tag${t === 'Mercantile' ? ' mercantile' : ''}">${t}</span>`).join('');
   const note = kind.mercantile ? 'Most private-sector offices are closed too.' : kind.bank ? 'Not a mercantile holiday, so many private-sector offices stay open.' : 'Check with your employer whether private-sector offices close.';
   return `<div class="class-tags" aria-label="Holiday type">${tags}</div><p class="dialog-body class-note">${note}</p>`;
@@ -61,9 +73,9 @@ function spanDays(spans) {
   return days;
 }
 function breakDays() {
-  const source = state.filter === 'mercantile' ? data.holidays.filter(isMercantile) : data.holidays;
-  return { weekends: spanDays(longWeekends(source, state.year)), leave: spanDays(leavePlans(source, state.year)) };
+  return { weekends: spanDays(yourLongWeekends()), leave: spanDays(yourLeavePlans()) };
 }
+const isOff = date => isWeekend(date, weekendDays());
 const spanClass = (info, column, prefix) => info ? ` ${prefix}${info.first || column === 0 ? ` ${prefix}-start` : ''}${info.last || column === 6 ? ` ${prefix}-end` : ''}` : '';
 const breakClass = (breaks, date, column) => spanClass(breaks.weekends.get(date), column, 'lw') + spanClass(breaks.leave.get(date), column, 'lp');
 function renderMonth() {
@@ -84,7 +96,7 @@ function renderMonth() {
     const info = breaks.weekends.get(cell.date);
     const plan = breaks.leave.get(cell.date);
     const day = `cal-day${breakClass(breaks, cell.date, index % 7)}`;
-    const cls = ['cal-dot', cell.weekend && 'is-weekend', plan?.isLeave && 'is-leave', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', isToday && 'is-today'].filter(Boolean).join(' ');
+    const cls = ['cal-dot', isOff(cell.date) && 'is-weekend', plan?.isLeave && 'is-leave', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', isToday && 'is-today'].filter(Boolean).join(' ');
     const current = isToday ? ' aria-current="date"' : '';
     const breakNote = info ? `, part of a ${info.days}-day long weekend` : '';
     if (plan?.isLeave) return `<div class="${day}"><span class="${cls}"${current} title="${`Take leave: ${plan.days} days off for ${plan.leave} leave day${plan.leave === 1 ? '' : 's'}`}">${cell.day}</span><span class="cal-name leave-name">Take leave</span></div>`;
@@ -92,16 +104,16 @@ function renderMonth() {
     const names = events.map(h => h.name);
     return `<div class="${day}"><button class="${cls}" data-date="${cell.date}"${current} aria-label="${esc(`${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${names.join(', ')}${breakNote}`)}">${cell.day}</button><span class="cal-name" aria-hidden="true">${esc(names.join(' · '))}</span></div>`;
   }).join('');
-  $('#calendar').innerHTML = `<div class="cal"><div class="cal-weekdays">${weekdays}</div><div class="cal-grid">${days}</div></div>`;
+  $('#calendar').innerHTML = `<div class="cal${prefs.saturday ? ' works-saturday' : ''}"><div class="cal-weekdays">${weekdays}</div><div class="cal-grid">${days}</div></div>`;
 }
 function renderYear() {
   const holidays = yearHolidays().filter(matches);
   const breaks = breakDays();
-  $('#calendar').innerHTML = `<div class="year-grid">${MONTHS.map((name, month) => `<button class="mini-month" data-month="${month}" aria-label="Open ${name} ${state.year}"><h3>${name}</h3><div class="mini-week">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<span>${d}</span>`).join('')}</div><div class="mini-dates">${monthCells(state.year, month).map((cell, index) => {
+  $('#calendar').innerHTML = `<div class="year-grid${prefs.saturday ? ' works-saturday' : ''}">${MONTHS.map((name, month) => `<button class="mini-month" data-month="${month}" aria-label="Open ${name} ${state.year}"><h3>${name}</h3><div class="mini-week">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<span>${d}</span>`).join('')}</div><div class="mini-dates">${monthCells(state.year, month).map((cell, index) => {
     if (!cell.inMonth) return '<span></span>';
     const band = breakClass(breaks, cell.date, index % 7).trim();
     const events = holidays.filter(h => h.date === cell.date);
-    const cls = ['mini-dot', cell.weekend && 'is-weekend', breaks.leave.get(cell.date)?.isLeave && 'is-leave', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', cell.date === today && 'is-today'].filter(Boolean).join(' ');
+    const cls = ['mini-dot', isOff(cell.date) && 'is-weekend', breaks.leave.get(cell.date)?.isLeave && 'is-leave', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', cell.date === today && 'is-today'].filter(Boolean).join(' ');
     return `<span${band ? ` class="${band}"` : ''}><i class="${cls}">${cell.day}</i></span>`;
   }).join('')}</div></button>`).join('')}</div>`;
 }
@@ -139,10 +151,45 @@ function render() {
   $('#upcoming-count').textContent = state.search ? `${coming.length} found` : `${state.year}`;
   $('#upcoming-list').innerHTML = coming.length ? coming.slice(0, 3).map(h => holidayRow(h)).join('') : '<p class="empty-state">No upcoming holidays match.<br>Explore the full year below.</p>';
   $('#holiday-total').textContent = new Set(all.map(h => h.date)).size;
-  $('#weekend-total').textContent = longWeekends(data.holidays, state.year).length;
+  $('#weekend-total').textContent = yourLongWeekends().length;
   $('#summary-year').textContent = state.year;
+  $('#week-note').textContent = `Based on ${prefs.saturday ? 'a Sunday-only' : 'a Saturday–Sunday'} weekend${prefs.holidays === 'mercantile' ? ' and mercantile holidays' : ''}.`;
   $('#calendar').setAttribute('aria-busy', 'false');
+  writeURL();
 }
+// The address keeps the month, view and filter, so any view can be shared or bookmarked.
+function writeURL() {
+  const params = new URLSearchParams();
+  const defaultMonth = state.year === thisYear && state.month === Number(today.slice(5, 7)) - 1;
+  if (state.view === 'month' && !defaultMonth) params.set('m', `${state.year}-${String(state.month + 1).padStart(2, '0')}`);
+  if (state.view !== 'month') { params.set('view', state.view); if (state.year !== thisYear) params.set('y', state.year); }
+  if (state.filter !== 'all') params.set('filter', state.filter);
+  const holiday = $('#detail-dialog').open && $('#detail-dialog').dataset.holiday;
+  if (holiday) params.set('holiday', holiday);
+  const url = `${location.pathname}${params.size ? `?${params}` : ''}`;
+  if (url === `${location.pathname}${location.search}`) { lastURL = url; return; }
+  // Moving between months or views makes a history entry; filters and dialogs just update the address.
+  const page = url.replace(/[?&](filter|holiday)=[^&]*/g, '');
+  if (page !== lastURL.replace(/[?&](filter|holiday)=[^&]*/g, '') && lastURL) history.pushState(null, '', url); else history.replaceState(null, '', url);
+  lastURL = url;
+}
+function readURL() {
+  const params = new URLSearchParams(location.search);
+  const month = params.get('m')?.match(/^(\d{4})-(\d{2})$/);
+  const view = ['year', 'list'].includes(params.get('view')) ? params.get('view') : 'month';
+  let year = month ? Number(month[1]) : Number(params.get('y')) || thisYear;
+  if (!availableYears.includes(year)) year = availableYears.includes(thisYear) ? thisYear : availableYears[0];
+  Object.assign(state, { view, year, month: month && Number(month[1]) === year ? Math.min(11, Math.max(0, Number(month[2]) - 1)) : year === thisYear ? Number(today.slice(5, 7)) - 1 : 0, filter: ['poya', 'public', 'mercantile'].includes(params.get('filter')) ? params.get('filter') : 'all' });
+  return params.get('holiday');
+}
+window.addEventListener('popstate', () => {
+  if (!data) return;
+  const holiday = readURL();
+  resetSearch(); lastURL = `${location.pathname}${location.search}`;
+  if ($('#detail-dialog').open && !holiday) $('#detail-dialog').close();
+  render();
+  if (holiday) showHoliday(holiday);
+});
 function navigate(direction) {
   if (!data) return;
   if (state.view === 'month') {
@@ -154,7 +201,8 @@ function navigate(direction) {
 }
 function resetSearch() { state.search = ''; $('#search').value = ''; }
 function download(holidays, filename) {
-  const blob = new Blob([createICS(holidays, data.fetchedAt, data.years)], { type: 'text/calendar;charset=utf-8' });
+  const content = typeof holidays === 'string' ? holidays : createICS(holidays, data.fetchedAt, data.years);
+  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a'); link.href = url; link.download = filename;
   document.body.append(link); link.click(); link.remove();
@@ -182,8 +230,20 @@ document.addEventListener('click', event => {
   if (holiday) showHoliday(holiday.dataset.holiday);
   const date = event.target.closest('[data-date]');
   if (date) showDate(date.dataset.date);
-  const mode = event.target.closest('[data-planner]');
-  if (mode) { plannerMode = mode.dataset.planner; $('#dialog-content').innerHTML = plannerContent(); $(`[data-planner="${plannerMode}"]`).focus(); }
+  const pref = event.target.closest('[data-pref]');
+  if (pref) {
+    const [key, value] = pref.dataset.pref.split(':');
+    prefs[key] = key === 'maxLeave' ? Number(value) : key === 'saturday' ? value === 'true' : value;
+    savePrefs(); render();
+    const planner = $('#detail-dialog').dataset.kind === 'planner';
+    $('#dialog-content').innerHTML = planner ? plannerContent() : settingsContent();
+    $(`[data-pref="${pref.dataset.pref}"]`)?.focus();
+  }
+  const plan = event.target.closest('[data-plan]');
+  if (plan) {
+    const found = yourLeavePlans().find(p => p.start === plan.dataset.plan);
+    if (found) download(createBreakICS(found, data.fetchedAt), `break-${found.start}.ics`);
+  }
   const copy = event.target.closest('[data-copy]');
   if (copy) copyLink(copy.dataset.copy);
   const month = event.target.closest('[data-month]');
@@ -194,15 +254,23 @@ document.addEventListener('click', event => {
 $('#export').onclick = () => { if (data) download(yearHolidays(), `sri-lanka-holidays-${state.year}.ics`); };
 $('#weekend-button').onclick = () => {
   if (!data) return;
-  const weekends = longWeekends(data.holidays, state.year);
-  openDialog(`<span class="dialog-symbol" aria-hidden="true">↟</span><h2 id="dialog-title" class="dialog-heading">A longer little break.</h2><p class="dialog-body">${state.year} breaks of three days or more, combining public holidays with Saturday and Sunday. No extra leave days included.${isEstimated(state.year) ? ' Holiday dates for this year are estimates.' : ''}</p>${weekends.map(w => `<div class="weekend-row"><span>${formatDate(w.start, { day: 'numeric', month: 'short' })} – ${formatDate(w.end, { day: 'numeric', month: 'short' })}<small>${formatDate(w.start, { weekday: 'long' })} to ${formatDate(w.end, { weekday: 'long' })}</small></span><strong>${w.days}<small>days off</small></strong></div>`).join('') || '<p class="dialog-body">No long weekends are listed for this year yet.</p>'}<p class="dialog-body">Your working week and holiday entitlement may differ. Verify dates before booking.</p>`);
+  const weekends = yourLongWeekends();
+  openDialog(`<span class="dialog-symbol" aria-hidden="true">↟</span><h2 id="dialog-title" class="dialog-heading">A longer little break.</h2><p class="dialog-body">${state.year} breaks of three days or more, combining ${prefs.holidays === 'mercantile' ? 'mercantile' : 'public'} holidays with your ${prefs.saturday ? 'Sunday' : 'Saturday and Sunday'}. No extra leave days included.${isEstimated(state.year) ? ' Holiday dates for this year are estimates.' : ''}</p>${weekends.map(w => `<div class="weekend-row"><span>${formatDate(w.start, { day: 'numeric', month: 'short' })} – ${formatDate(w.end, { day: 'numeric', month: 'short' })}<small>${formatDate(w.start, { weekday: 'long' })} to ${formatDate(w.end, { weekday: 'long' })}</small></span><strong>${w.days}<small>days off</small></strong></div>`).join('') || '<p class="dialog-body">No long weekends are listed for this year yet.</p>'}<p class="dialog-body">Your working week and holiday entitlement may differ. Verify dates before booking.</p>`);
 };
+function prefsControls() {
+  const group = (label, key, options) => `<div class="pref-group"><span class="pref-label" id="pref-${key}">${label}</span><div class="filters" role="group" aria-labelledby="pref-${key}">${options.map(([value, text]) => {
+    const active = String(prefs[key]) === String(value);
+    return `<button class="filter${active ? ' active' : ''}" data-pref="${key}:${value}" aria-pressed="${active}">${text}</button>`;
+  }).join('')}</div></div>`;
+  return `<div class="prefs">${group('Holidays I get', 'holidays', [['all', 'All public holidays'], ['mercantile', 'Mercantile only']])}${group('I work', 'saturday', [[false, 'Mon – Fri'], [true, 'Mon – Sat']])}${group('Leave days I can take', 'maxLeave', [1, 2, 3, 4, 5].map(n => [n, `Up to ${n}`]))}</div>`;
+}
+function settingsContent() {
+  return `<span class="dialog-symbol" aria-hidden="true">⚙</span><h2 id="dialog-title" class="dialog-heading">Your days off.</h2><p class="dialog-body">Long weekends, leave ideas and weekend colours follow these settings. They are saved in this browser only.</p>${prefsControls()}<p class="dialog-body planner-hint">Government and bank staff usually get every public holiday; most private-sector staff get mercantile holidays only.</p>`;
+}
 function plannerContent() {
-  const holidays = plannerMode === 'mercantile' ? data.holidays.filter(isMercantile) : data.holidays;
-  const plans = leavePlans(holidays, state.year, { from: state.year === thisYear ? today : '' });
-  const modes = [['all', 'All public holidays'], ['mercantile', 'Mercantile only']].map(([key, label]) => `<button class="filter${plannerMode === key ? ' active' : ''}" data-planner="${key}" aria-pressed="${plannerMode === key}">${label}</button>`).join('');
-  const rows = plans.map(p => `<div class="weekend-row"><span>Take ${p.leaveDates.map(d => shortDate(d, { weekday: 'short' })).join(', ')} off<small>${shortDate(p.start, { weekday: 'short' })} – ${shortDate(p.end, { weekday: 'short' })}</small></span><strong>${p.days}<small>days off for ${p.leave} leave day${p.leave === 1 ? '' : 's'}</small></strong></div>`).join('');
-  return `<span class="dialog-symbol" aria-hidden="true">✦</span><h2 id="dialog-title" class="dialog-heading">More days off, less leave.</h2><p class="dialog-body">Up to three leave days that join ${state.year} holidays to a weekend. The best value for each break is shown.${isEstimated(state.year) ? ' Holiday dates for this year are estimates.' : ''}</p><div class="filters planner-modes" role="group" aria-label="Holidays you get off">${modes}</div><p class="dialog-body planner-hint">${plannerMode === 'mercantile' ? 'For private-sector workers who get mercantile holidays only.' : 'For government, bank and other workers who get every public holiday.'}</p>${rows || `<p class="dialog-body">No leave ideas ${state.year === thisYear ? 'left ' : ''}for ${state.year}.</p>`}<p class="dialog-body">Your working week and leave rules may differ. Verify dates before booking.</p>`;
+  const plans = yourLeavePlans(state.year === thisYear ? today : '');
+  const rows = plans.map(p => `<div class="weekend-row plan-row"><span>Take ${p.leaveDates.map(d => shortDate(d, { weekday: 'short' })).join(', ')} off<small>${shortDate(p.start, { weekday: 'short' })} – ${shortDate(p.end, { weekday: 'short' })}</small><button class="feed-link" data-plan="${p.start}">↓ Add break to my calendar</button></span><strong>${p.days}<small>days off for ${p.leave} leave day${p.leave === 1 ? '' : 's'}</small></strong></div>`).join('');
+  return `<span class="dialog-symbol" aria-hidden="true">✦</span><h2 id="dialog-title" class="dialog-heading">More days off, less leave.</h2><p class="dialog-body">Leave days that join ${state.year} holidays to your weekend. The best value for each break is shown.${isEstimated(state.year) ? ' Holiday dates for this year are estimates.' : ''}</p>${prefsControls()}${rows || `<p class="dialog-body">No leave ideas ${state.year === thisYear ? 'left ' : ''}for ${state.year}.</p>`}<p class="dialog-body">Your leave rules may differ. Verify dates before booking.</p>`;
 }
 function subscribeContent() {
   const feeds = [['holidays.ics', 'All public holidays', 'Poya, public and bank holidays. Best for government and bank workers.'], ['holidays-mercantile.ics', 'Mercantile holidays', 'Only the days most private-sector offices close.']];
@@ -215,11 +283,19 @@ async function copyLink(url) {
   try { await navigator.clipboard.writeText(url); notify('Link copied. Paste it into your calendar’s “Subscribe” option.'); }
   catch { notify(url); }
 }
-$('#planner-button').onclick = () => { if (data) openDialog(plannerContent()); };
+$('#planner-button').onclick = () => { if (data) openDialog(plannerContent(), 'planner'); };
+const syncThemeButton = () => $('#theme-toggle').setAttribute('aria-label', `Switch to ${document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'} theme`);
+$('#theme-toggle').onclick = () => { window.islandTheme?.toggle(); syncThemeButton(); };
+syncThemeButton();
+$('#prefs-button').onclick =() => { if (data) openDialog(settingsContent(), 'settings'); };
 $('#subscribe').onclick = () => openDialog(subscribeContent());
-$('#about').onclick =() => openDialog('<span class="dialog-symbol" aria-hidden="true">✳</span><h2 id="dialog-title" class="dialog-heading">For a little more living.</h2><p class="dialog-body">Island Days is an independent calendar for Sri Lanka’s public holidays. Find Poya days, plan a long weekend, and save the year to your favourite calendar.</p><p class="dialog-body">Holiday dates are sourced from PublicHolidays.lk. The calendar displays the last successful data check; estimated years are labelled. Poya days are public holidays too, and are highlighted separately for easy browsing.</p><p class="dialog-body">All dates use the Sri Lanka calendar day (Asia/Colombo). Holiday dates and working arrangements can change. Verify with the source or your employer before making plans.</p><a class="dialog-action" href="https://publicholidays.lk/" target="_blank" rel="noopener noreferrer">Visit the source ↗</a>');
+$('#about').onclick =() => openDialog('<span class="dialog-symbol" aria-hidden="true">✳</span><h2 id="dialog-title" class="dialog-heading">For a little more living.</h2><p class="dialog-body">Island Days is an independent calendar for Sri Lanka’s public holidays. Find Poya days, plan a long weekend, and save the year to your favourite calendar.</p><p class="dialog-body">Holiday dates are sourced from PublicHolidays.lk and checked against the Central Bank of Sri Lanka’s holiday list, which also says which days are bank and mercantile holidays. The calendar displays the last successful data check; estimated years are labelled. Poya days are public holidays too, and are highlighted separately for easy browsing.</p><p class="dialog-body">All dates use the Sri Lanka calendar day (Asia/Colombo). Holiday dates and working arrangements can change. Verify with the source or your employer before making plans.</p><a class="dialog-action" href="https://publicholidays.lk/" target="_blank" rel="noopener noreferrer">Visit the source ↗</a>');
 $('#close-dialog').onclick = () => $('#detail-dialog').close();
-$('#detail-dialog').addEventListener('close', () => { if (focusedBeforeDialog?.isConnected) focusedBeforeDialog.focus(); });
+$('#detail-dialog').addEventListener('close', () => {
+  $('#detail-dialog').dataset.kind = ''; $('#detail-dialog').dataset.holiday = '';
+  if (data) writeURL();
+  if (focusedBeforeDialog?.isConnected) focusedBeforeDialog.focus();
+});
 $('#detail-dialog').addEventListener('click', event => { if (event.target === $('#detail-dialog')) { const r = event.target.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) event.target.close(); } });
 async function init() {
   try {
@@ -229,12 +305,15 @@ async function init() {
     if (data.schemaVersion !== 1 || !data.holidays?.length || !data.years || !Number.isFinite(Date.parse(data.fetchedAt))) throw new Error('Invalid calendar data');
     availableYears = Object.keys(data.years).map(Number).sort();
     if (!availableYears.includes(state.year)) state.year = availableYears.reduce((best, year) => Math.abs(year - thisYear) < Math.abs(best - thisYear) ? year : best);
+    const linkedHoliday = location.search ? readURL() : null;
     $('#year').innerHTML = availableYears.map(year => `<option value="${year}">${year}</option>`).join('');
     const stale = Date.now() - Date.parse(data.fetchedAt) > 45 * 86400000;
     $('.data-line').classList.toggle('stale', stale);
     const checked = colomboToday(new Date(data.fetchedAt));
     $('#sync-status').textContent = `${stale ? 'Update overdue · Last checked' : 'Last checked'} ${formatDate(checked, { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    lastURL = `${location.pathname}${location.search}`;
     renderHero(); render();
+    if (linkedHoliday) showHoliday(linkedHoliday);
   } catch (error) {
     console.error(error);
     data = undefined;

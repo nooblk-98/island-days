@@ -17,9 +17,9 @@ export function monthCells(year, month) {
     return { date: isoDate(date), day: date.getUTCDate(), inMonth: date.getUTCMonth() === month, weekend: [0, 6].includes(date.getUTCDay()) };
   });
 }
-export function longWeekends(holidays, year) {
+export function longWeekends(holidays, year, { weekend = [0, 6] } = {}) {
   const days = new Set(holidays.filter(h => h.date.startsWith(`${year}-`)).map(h => h.date));
-  const off = value => days.has(value) || [0, 6].includes(parseDate(value).getUTCDay());
+  const off = value => days.has(value) || isWeekend(value, weekend);
   const results = [];
   let start = `${year}-01-01`;
   const end = `${year}-12-31`;
@@ -36,18 +36,20 @@ export function longWeekends(holidays, year) {
 // Every gazetted holiday is a bank holiday; only these are also mercantile (private-sector) holidays.
 const MERCANTILE = [/thai pongal/, /^(national|independence) day/, /^day prior to sinhala/, /^sinhala (&|and) tamil new year/, /^may day/, /^day following vesak/, /milad/, /christmas/];
 const BANK = [/full moon poya/, /mahasiv/, /^e?id[ -]ul[ -]?(fitr|alha|adha|allah)/, /good friday/, /deepa[vw]ali/, ...MERCANTILE];
-export function holidayClass(name) {
-  const n = String(name).toLowerCase();
+// Accepts a holiday (official flags from the Central Bank list win) or a bare name (rules above).
+export function holidayClass(holiday) {
+  if (typeof holiday === 'object' && typeof holiday.bank === 'boolean') return { bank: holiday.bank, mercantile: holiday.mercantile === true };
+  const n = String(typeof holiday === 'object' ? holiday.name : holiday).toLowerCase();
   const mercantile = MERCANTILE.some(rule => rule.test(n));
   return { bank: mercantile || BANK.some(rule => rule.test(n)), mercantile };
 }
-export const isWeekend = value => [0, 6].includes(parseDate(value).getUTCDay());
+export const isWeekend = (value, weekend = [0, 6]) => weekend.includes(parseDate(value).getUTCDay());
 // Suggest short leave blocks that bridge holidays and weekends into longer breaks.
-export function leavePlans(holidays, year, { maxLeave = 3, from = '' } = {}) {
+export function leavePlans(holidays, year, { maxLeave = 3, from = '', weekend = [0, 6] } = {}) {
   const days = new Set(holidays.map(h => h.date));
-  const off = value => days.has(value) || isWeekend(value);
+  const off = value => days.has(value) || isWeekend(value, weekend);
   const seen = new Set(), candidates = [];
-  for (const anchor of [...days].filter(d => d.startsWith(`${year}-`) && !isWeekend(d)).sort()) {
+  for (const anchor of [...days].filter(d => d.startsWith(`${year}-`) && !isWeekend(d, weekend)).sort()) {
     for (let s = -(maxLeave + 4); s <= 0; s++) for (let e = 0; e <= maxLeave + 4; e++) {
       const start = addDays(anchor, s), end = addDays(anchor, e), key = `${start}/${end}`;
       if (seen.has(key) || off(addDays(start, -1)) || off(addDays(end, 1))) continue;
@@ -82,10 +84,19 @@ export function createICS(holidays, fetchedAt, estimatedYears = {}, { name = 'Sr
   if (feed) lines.push('REFRESH-INTERVAL;VALUE=DURATION:P1D', 'X-PUBLISHED-TTL:P1D');
   for (const h of holidays) {
     const estimated = estimatedYears[h.date.slice(0, 4)]?.estimated;
-    const kind = holidayClass(h.name);
+    const kind = holidayClass(h);
     const categories = [h.type === 'poya' ? 'Poya day' : 'Public holiday', ...(kind.bank ? ['Bank holiday'] : []), ...(kind.mercantile ? ['Mercantile holiday'] : [])];
     lines.push('BEGIN:VEVENT', `UID:${h.id}@island-days.local`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${h.date.replace(/-/g, '')}`, `DTEND;VALUE=DATE:${addDays(h.date, 1).replace(/-/g, '')}`, `SUMMARY:${escapeICS(h.name)}${estimated ? ' (estimated)' : ''}`, `CATEGORIES:${categories.map(escapeICS).join(',')}`, `DESCRIPTION:${escapeICS(`${categories.join(' · ')}\nSource: ${h.sourceUrl}\n${estimated ? 'Estimated date. ' : ''}Dates may change. Verify before making plans.`)}`, `URL:${h.sourceUrl}`, 'TRANSP:TRANSPARENT', 'END:VEVENT');
   }
   lines.push('END:VCALENDAR');
+  return lines.map(foldLine).join('\r\n') + '\r\n';
+}
+// One all-day event covering a whole break, marked busy so it blocks the calendar.
+export function createBreakICS(plan, fetchedAt) {
+  const stamp = new Date(fetchedAt).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const leave = plan.leaveDates.map(d => parseDate(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }));
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Island Days//Sri Lanka Holidays//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+    `UID:break-${plan.start}-${plan.end}@island-days.local`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${plan.start.replace(/-/g, '')}`, `DTEND;VALUE=DATE:${addDays(plan.end, 1).replace(/-/g, '')}`,
+    `SUMMARY:${escapeICS(`Break: ${plan.days} days off`)}`, `DESCRIPTION:${escapeICS(`Leave to apply for: ${leave.join(', ')}.\nPlanned with Island Days. Verify holiday dates before booking.`)}`, 'TRANSP:OPAQUE', 'END:VEVENT', 'END:VCALENDAR'];
   return lines.map(foldLine).join('\r\n') + '\r\n';
 }

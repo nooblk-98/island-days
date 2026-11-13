@@ -7,15 +7,14 @@ const site = (process.env.SITE_URL || 'https://dayoff.itsnooblk.com').replace(/\
 const dist = new URL('../dist/', import.meta.url);
 await mkdir(dist, { recursive: true });
 await cp(new URL('../public/', import.meta.url), dist, { recursive: true });
-for (const file of ['app.js', 'styles.css', 'calendar.js']) {
+for (const file of ['app.js', 'styles.css', 'calendar.js', 'theme.js']) {
   await cp(new URL(`../src/${file}`, import.meta.url), new URL(file, dist));
 }
-await cp(new URL('../docs/preview.jpg', import.meta.url), new URL('og.jpg', dist));
 
 // Subscribable calendar feeds: calendar apps re-fetch these, so every deploy reaches subscribers.
 const feeds = [
   { file: 'holidays.ics', holidays: data.holidays, name: 'Sri Lanka Public Holidays', description: 'Sri Lanka public, bank and Poya holidays from Island Days.' },
-  { file: 'holidays-mercantile.ics', holidays: data.holidays.filter(h => holidayClass(h.name).mercantile), name: 'Sri Lanka Mercantile Holidays', description: 'Sri Lanka mercantile (private-sector) holidays from Island Days.' }
+  { file: 'holidays-mercantile.ics', holidays: data.holidays.filter(h => holidayClass(h).mercantile), name: 'Sri Lanka Mercantile Holidays', description: 'Sri Lanka mercantile (private-sector) holidays from Island Days.' }
 ];
 for (const feed of feeds) await writeFile(new URL(feed.file, dist), createICS(feed.holidays, data.fetchedAt, data.years, { ...feed, feed: true }));
 

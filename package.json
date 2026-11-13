@@ -11,7 +11,8 @@
     "build": "node scripts/build.mjs",
     "refresh": "node scripts/refresh.mjs",
     "test": "node --test",
-    "deploy": "wrangler pages deploy dist --project-name island-days"
+    "deploy": "wrangler pages deploy dist --project-name island-days",
+    "og": "node scripts/og.mjs"
   },
   "dependencies": {
     "cheerio": "1.1.2"
