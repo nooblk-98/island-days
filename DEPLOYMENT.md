@@ -2,7 +2,7 @@
 
 Island Days is ready for Cloudflare Pages. The included data was fetched directly from https://publicholidays.lk/ on 13 November 2026. There are 76 holiday entries for 2026–2028. Multiple holidays may share a date. The source currently marks 2027 and 2028 as estimates; the website and calendar downloads preserve that label.
 
-The website has been built and tested locally. It has **not** been deployed to your Cloudflare account. Monthly updates start only after you complete the setup below and the first workflow run succeeds.
+The maintained calendar is live at **https://island-days.pages.dev/**. The repository is connected to Cloudflare Pages: pushes to `main` deploy the saved calendar, and monthly or manual runs refresh the source before deploying. The instructions below are a reference for setting up a separate deployment.
 
 ## Recommended: automatic monthly updates
 
@@ -50,7 +50,7 @@ The workflow requests repository contents write access so it can save refreshed 
 
 Open **Actions → Update holidays and deploy → Run workflow**, choose **main**, and start it. If Actions are disabled for the repository or a fork, enable them first.
 
-A successful run fetches PublicHolidays.lk, validates the source, runs the tests, builds the website, saves the checked data, and publishes it to Cloudflare Pages. Cloudflare will show your actual `pages.dev` address. Later pushes to `main` also publish the site.
+A successful monthly or manual run fetches PublicHolidays.lk, validates the source, runs the tests, builds the website, saves the checked data, and publishes it to Cloudflare Pages. Pushes to `main` test, build, and deploy the saved dataset without fetching the source, so a source outage does not block a site change. Cloudflare will show your actual `pages.dev` address.
 
 Until all three Cloudflare settings are present, the workflow runs the tests and builds the saved calendar, and skips fetching and publishing with a “Cloudflare setup pending” summary. A green check alone does not mean a deployment occurred; check the deployment step and Cloudflare dashboard.
 

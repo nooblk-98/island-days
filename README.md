@@ -5,6 +5,8 @@
   <p><strong>A little more time for life.</strong></p>
   <p>A thoughtfully designed public holiday calendar for Sri Lanka.<br>Find your next pause, explore Poya days, and make room for a longer break.</p>
 
+  <p><a href="https://island-days.pages.dev/"><strong>Explore the live calendar ↗</strong></a></p>
+
   [![Calendar checks](https://github.com/nooblk-98/island-days/actions/workflows/update-and-deploy.yml/badge.svg)](https://github.com/nooblk-98/island-days/actions/workflows/update-and-deploy.yml)
   ![JavaScript](https://img.shields.io/badge/JavaScript-ES_modules-f2cc60?logo=javascript&logoColor=253c30)
   ![Cloudflare Pages](https://img.shields.io/badge/Cloudflare-Pages-f38020?logo=cloudflarepages&logoColor=white)
@@ -31,7 +33,7 @@ The project is maintained by [nooblk-98](https://github.com/nooblk-98), with hol
 
 ## Maintained, with care
 
-A monthly GitHub Actions workflow is included to refresh the source data, validate holiday tables, run calendar checks, and publish to Cloudflare Pages when deployment is configured. Failed refreshes leave the current live calendar available, and past years remain available as the source rolls forward.
+Every push to `main` builds, checks, and deploys the calendar to Cloudflare Pages. A monthly GitHub Actions run refreshes and validates the source data before publishing; the same refresh can be run manually. Failed refreshes leave the current live calendar available, and past years remain available as the source rolls forward.
 
 Dates use **Asia/Colombo**, independently of the visitor’s browser timezone. Poya days are public holidays and are highlighted separately. Year totals count distinct dates, including days with more than one holiday.
 
