@@ -3452,3 +3452,13 @@ select:focus-visible {
   .weekend-row:has(.break-metrics) { flex-direction: column; align-items: flex-start; gap: 10px; }
   .weekend-row .break-metrics { justify-content: flex-start; }
 }
+/* Keep both legend rows on shared columns and centre the key beneath the calendar. */
+.calendar-bottom { justify-content: center; }
+.legend { display: grid; grid-template-columns: 64px 80px 120px 96px; gap: 12px 16px; width: max-content; max-width: 100%; }
+.legend-group { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; gap: inherit; width: auto; }
+.legend-group > span:not(.legend-label) { display: grid; grid-template-columns: 16px minmax(0, 1fr); column-gap: 6px; white-space: normal; line-height: 1.45; }
+.legend-group .legend-label { min-width: 0; }
+.legend-group .dot { justify-self: center; }
+@media (max-width: 600px) {
+  .legend { width: 100%; grid-template-columns: 58px minmax(0, 0.8fr) minmax(0, 1.35fr) minmax(0, 1fr); column-gap: 10px; }
+}
