@@ -62,7 +62,7 @@ for (const year of years) {
   const pageDescription = `All ${list.length} Sri Lanka public holidays in ${year} from the official gazette, including ${poya} Poya days, ${mercantile} mercantile holidays and ${breaks.length} long weekends.`;
   const rows = list.map(h => {
     const kind = holidayClass(h);
-    const tags = `<span class="tag ${h.type}">${h.type === 'poya' ? 'Poya day' : 'Public'}</span>${kind.bank ? '<span class="tag">Bank</span>' : ''}${kind.mercantile ? '<span class="tag mercantile">Mercantile</span>' : ''}`;
+    const tags = `<span class="tag ${h.type}">${h.type === 'poya' ? 'Poya day' : 'Public'}</span>${kind.mercantile ? '<span class="tag mercantile">Mercantile</span>' : ''}`;
     return `        <tr><td><time datetime="${h.date}">${formatDate(h.date, { day: 'numeric', month: 'long' })}</time></td><td>${formatDate(h.date, { weekday: 'long' })}</td><td>${esc(h.name)}</td><td>${tags}</td></tr>`;
   }).join('\n');
   const weekendRows = breaks.map(w => `      <li><strong>${w.days} days</strong> ${formatDate(w.start, { weekday: 'long', day: 'numeric', month: 'long' })} to ${formatDate(w.end, { weekday: 'long', day: 'numeric', month: 'long' })}</li>`).join('\n');
@@ -99,7 +99,7 @@ for (const year of years) {
   <link rel="stylesheet" href="/styles.css">
 ${ldScript(yearLd)}
 <body class="year-page">
-  <header class="site-header"><a class="brand" href="/" aria-label="Island Days home"><span class="brand-icon" aria-hidden="true">✳</span><span>island<span class="brand-light">days</span><span class="brand-dot">.</span></span></a><a class="year-page-cta" href="/?view=list&amp;y=${year}">Open the interactive calendar ↗</a></header>
+  <header class="site-header"><a class="brand" href="/" aria-label="Island Days home"><span class="brand-icon" aria-hidden="true">✳</span><span>island<span class="brand-light">days</span><span class="brand-dot">.</span></span></a><a class="year-page-cta" href="/?view=list&amp;y=${year}"><span class="cta-long">Open the interactive calendar</span><span class="cta-short">Calendar</span> ↗</a></header>
   <main class="year-main">
     <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Island Days</a> › <span>Sri Lanka holidays ${year}</span></nav>
     <h1>Sri Lanka Public Holidays ${year}</h1>
