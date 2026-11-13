@@ -1,4 +1,4 @@
-import { MONTHS, monthCells, colomboToday, formatDate, parseDate, daysBetween, longWeekends, createICS, holidayClass, leavePlans } from './calendar.js';
+import { MONTHS, monthCells, colomboToday, formatDate, parseDate, daysBetween, longWeekends, createICS, holidayClass, leavePlans, addDays } from './calendar.js';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const today = colomboToday();
@@ -53,7 +53,16 @@ function renderHero() {
   $('#next-holiday').onclick = () => showHoliday(next.id);
   $('#next-holiday').setAttribute('aria-label', `Next holiday: ${next.name}, ${formatDate(next.date)}`);
 }
+// Days that belong to a long weekend, so the calendars can draw one band across each break.
+function breakDays() {
+  const source = state.filter === 'mercantile' ? data.holidays.filter(isMercantile) : data.holidays;
+  const days = new Map();
+  for (const w of longWeekends(source, state.year)) for (let d = w.start; d <= w.end; d = addDays(d, 1)) days.set(d, { ...w, first: d === w.start, last: d === w.end });
+  return days;
+}
+const breakClass = (info, column) => info ? ` lw${info.first || column === 0 ? ' lw-start' : ''}${info.last || column === 6 ? ' lw-end' : ''}` : '';
 function renderMonth() {
+  const breaks = breakDays();
   const cells = monthCells(state.year, state.month);
   const byDate = new Map();
   for (const h of data.holidays.filter(matches)) {
@@ -63,23 +72,30 @@ function renderMonth() {
   const showsToday = today.startsWith(`${state.year}-${String(state.month + 1).padStart(2, '0')}-`);
   const todayColumn = (parseDate(today).getUTCDay() + 6) % 7;
   const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, i) => `<span${showsToday && i === todayColumn ? ' class="is-current"' : ''}>${d}</span>`).join('');
-  const days = cells.map(cell => {
+  const days = cells.map((cell, index) => {
     if (!cell.inMonth) return '<div class="cal-day is-empty" aria-hidden="true"></div>';
     const events = byDate.get(cell.date) || [];
     const isToday = cell.date === today;
-    const cls = ['cal-dot', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', isToday && 'is-today'].filter(Boolean).join(' ');
+    const info = breaks.get(cell.date);
+    const day = `cal-day${breakClass(info, index % 7)}`;
+    const cls = ['cal-dot', cell.weekend && 'is-weekend', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', isToday && 'is-today'].filter(Boolean).join(' ');
     const current = isToday ? ' aria-current="date"' : '';
-    if (!events.length) return `<div class="cal-day"><span class="${cls}"${current}>${cell.day}</span></div>`;
+    const breakNote = info ? `, part of a ${info.days}-day long weekend` : '';
+    if (!events.length) return `<div class="${day}"><span class="${cls}"${current}${info ? ` title="${info.days}-day long weekend"` : ''}>${cell.day}</span></div>`;
     const names = events.map(h => h.name);
-    return `<div class="cal-day"><button class="${cls}" data-date="${cell.date}"${current} aria-label="${esc(`${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${names.join(', ')}`)}">${cell.day}</button><span class="cal-name" aria-hidden="true">${esc(names.join(' · '))}</span></div>`;
+    return `<div class="${day}"><button class="${cls}" data-date="${cell.date}"${current} aria-label="${esc(`${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${names.join(', ')}${breakNote}`)}">${cell.day}</button><span class="cal-name" aria-hidden="true">${esc(names.join(' · '))}</span></div>`;
   }).join('');
   $('#calendar').innerHTML = `<div class="cal"><div class="cal-weekdays">${weekdays}</div><div class="cal-grid">${days}</div></div>`;
 }
 function renderYear() {
   const holidays = yearHolidays().filter(matches);
-  $('#calendar').innerHTML = `<div class="year-grid">${MONTHS.map((name, month) => `<button class="mini-month" data-month="${month}" aria-label="Open ${name} ${state.year}"><h3>${name}</h3><div class="mini-week">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<span>${d}</span>`).join('')}</div><div class="mini-dates">${monthCells(state.year, month).map(cell => {
+  const breaks = breakDays();
+  $('#calendar').innerHTML = `<div class="year-grid">${MONTHS.map((name, month) => `<button class="mini-month" data-month="${month}" aria-label="Open ${name} ${state.year}"><h3>${name}</h3><div class="mini-week">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<span>${d}</span>`).join('')}</div><div class="mini-dates">${monthCells(state.year, month).map((cell, index) => {
+    if (!cell.inMonth) return '<span></span>';
+    const band = breakClass(breaks.get(cell.date), index % 7).trim();
     const events = holidays.filter(h => h.date === cell.date);
-    return `<span class="${cell.inMonth ? '' : 'is-outside'} ${events.some(h => h.type === 'poya') ? 'is-poya' : events.length ? 'is-public' : ''} ${cell.date === today ? 'is-today' : ''}">${cell.day}</span>`;
+    const cls = ['mini-dot', cell.weekend && 'is-weekend', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', cell.date === today && 'is-today'].filter(Boolean).join(' ');
+    return `<span${band ? ` class="${band}"` : ''}><i class="${cls}">${cell.day}</i></span>`;
   }).join('')}</div></button>`).join('')}</div>`;
 }
 function render() {
