@@ -3462,3 +3462,13 @@ select:focus-visible {
 @media (max-width: 600px) {
   .legend { width: 100%; grid-template-columns: 58px minmax(0, 0.8fr) minmax(0, 1.35fr) minmax(0, 1fr); column-gap: 10px; }
 }
+/* Compact desktop calendar, retaining a consistent two-line holiday label slot. */
+@media (min-width: 601px) {
+  .cal { --dot: 36px; padding: 18px 16px 14px; }
+  .cal-grid { grid-auto-rows: minmax(74px, 1fr); row-gap: 8px; }
+  .cal .cal-dot { width: 36px; height: 36px; font-size: 13px; }
+  .cal .cal-name { margin-top: 6px; font-size: 12px; line-height: 1.2; }
+  .cal .month-breaks { margin-top: 14px; padding-top: 14px; }
+  .month-breaks .break-item { padding: 12px 14px; }
+  .month-breaks .break-body { gap: 8px; }
+}
