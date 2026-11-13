@@ -10,6 +10,8 @@ await cp(new URL('../public/', import.meta.url), dist, { recursive: true });
 for (const file of ['app.js', 'styles.css', 'calendar.js', 'theme.js']) {
   await cp(new URL(`../src/${file}`, import.meta.url), new URL(file, dist));
 }
+// Embeddable next-holiday widget (served at /widget/, allowed inside other sites by _headers).
+await cp(new URL('../src/widget/', import.meta.url), new URL('widget/', dist), { recursive: true });
 
 // Subscribable calendar feeds: calendar apps re-fetch these, so every deploy reaches subscribers.
 const feeds = [

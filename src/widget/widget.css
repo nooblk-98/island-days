@@ -1,0 +1,18 @@
+:root{--bg:#284f3c;--ink:#f7f6e9;--soft:#c7d0bc;--gold:#f1d58b;--pill:#ffffff1a;--line:#ffffff24}
+[data-theme="light"]{--bg:#f8f8f2;--ink:#253c30;--soft:#6f7868;--gold:#a77727;--pill:#e5ebdb;--line:#e1e5d6}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:transparent}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.card{display:flex;flex-direction:column;gap:8px;height:100%;padding:16px 18px;border-radius:16px;background:var(--bg);color:var(--ink);text-decoration:none;border:1px solid var(--line);overflow:hidden}
+.card:focus-visible{outline:2px solid #b7953f;outline-offset:-4px}
+.top{display:flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.9px;text-transform:uppercase;color:var(--soft)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.main{display:flex;align-items:center;gap:12px}
+.day{font-family:Georgia,"Times New Roman",serif;font-size:44px;line-height:1;color:var(--gold)}
+.meta{display:grid;gap:3px;font-size:12px;letter-spacing:.6px;color:var(--soft)}
+.name{font-size:16px;font-weight:600;line-height:1.3}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+.pill{font-size:11px;font-weight:600;letter-spacing:.5px;padding:4px 10px;border-radius:999px;background:var(--pill)}
+.pill:empty{display:none}
+.brand{font-size:12px;color:var(--soft)}.brand b{font-weight:400}
+.break{font-size:11.5px;color:var(--soft);padding-top:8px;border-top:1px solid var(--line)}

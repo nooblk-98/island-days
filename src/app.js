@@ -278,6 +278,9 @@ document.addEventListener('click', event => {
   }
   const reminder = event.target.closest('[data-reminders]');
   if (reminder) { withReminders = reminder.dataset.reminders === 'on'; $('#dialog-content').innerHTML = subscribeContent(); $(`[data-reminders="${reminder.dataset.reminders}"]`)?.focus(); }
+  const embed = event.target.closest('[data-embed]');
+  if (embed) { const [key, value] = embed.dataset.embed.split(':'); if (key === 'theme') embedTheme = value; else embedMercantile = value === 'mercantile'; $('#dialog-content').innerHTML = embedContent(); $(`[data-embed="${embed.dataset.embed}"]`)?.focus(); }
+  if (event.target.closest('[data-copy-embed]')) { const code = embedCode().html; navigator.clipboard?.writeText(code).then(() => notify('Code copied. Paste it into your website’s HTML.'), () => { $('#embed-code').select(); notify('Select the code and copy it.'); }); }
   const copy = event.target.closest('[data-copy]');
   if (copy) copyLink(copy.dataset.copy);
   const month = event.target.closest('[data-month]');
@@ -325,6 +328,21 @@ const syncThemeButton = () => $('#theme-toggle').setAttribute('aria-label', `Swi
 $('#theme-toggle').onclick = () => { window.islandTheme?.toggle(); syncThemeButton(); };
 syncThemeButton();
 $('#prefs-button').onclick =() => { if (data) openDialog(settingsContent(), 'settings'); };
+let embedTheme = 'auto', embedMercantile = false;
+function embedCode() {
+  const params = new URLSearchParams();
+  if (embedTheme !== 'auto') params.set('theme', embedTheme);
+  if (embedMercantile) params.set('holidays', 'mercantile');
+  const src = `${location.origin}/widget/${params.size ? `?${params}` : ''}`;
+  return { src, html: `<iframe src="${src}" width="320" height="200" style="border:0;border-radius:16px;max-width:100%" title="Next Sri Lanka holiday" loading="lazy"></iframe>
+<p><a href="${location.origin}/">Sri Lanka holidays and long weekends</a> by Island Days</p>` };
+}
+function embedContent() {
+  const { src, html } = embedCode();
+  const chip = (key, value, label, on) => `<button class="filter${on ? ' active' : ''}" data-embed="${key}:${value}" aria-pressed="${on}">${label}</button>`;
+  return `<span class="dialog-symbol" aria-hidden="true">✳</span><h2 id="dialog-title" class="dialog-heading">Add Island Days to your website.</h2><p class="dialog-body">Show the next Sri Lanka holiday on your blog, school or company site. It updates itself every day.</p><div class="pref-group"><span class="pref-label">Theme</span><div class="filters">${chip('theme', 'auto', 'Match visitor', embedTheme === 'auto')}${chip('theme', 'light', 'Light', embedTheme === 'light')}${chip('theme', 'dark', 'Dark', embedTheme === 'dark')}</div></div><div class="pref-group"><span class="pref-label">Holidays</span><div class="filters">${chip('holidays', 'all', 'All public holidays', !embedMercantile)}${chip('holidays', 'mercantile', 'Mercantile only', embedMercantile)}</div></div><div class="embed-preview"><iframe src="${esc(src)}" width="320" height="200" title="Widget preview" loading="lazy"></iframe></div><label class="pref-label" for="embed-code">Copy this code</label><textarea id="embed-code" class="embed-code" readonly rows="4">${esc(html)}</textarea><button class="dialog-action" data-copy-embed>Copy code</button>`;
+}
+$('#embed-link').onclick = () => openDialog(embedContent(), 'embed');
 $('#subscribe').onclick = () => openDialog(subscribeContent());
 $('#about').onclick =() => openDialog('<span class="dialog-symbol" aria-hidden="true">✳</span><h2 id="dialog-title" class="dialog-heading">For a little more living.</h2><p class="dialog-body">Island Days is an independent calendar for Sri Lanka’s public holidays. Find Poya days, plan a long weekend, and save the year to your favourite calendar.</p><p class="dialog-body">Holiday dates come from the Central Bank of Sri Lanka’s holiday list, which follows the government gazette and marks each day as a public, bank and/or mercantile holiday. A new year appears here once it has been gazetted. The calendar displays the last successful data check; estimated years are labelled. Poya days are public holidays too, and are highlighted separately for easy browsing.</p><p class="dialog-body">All dates use the Sri Lanka calendar day (Asia/Colombo). Holiday dates and working arrangements can change. Verify with the source or your employer before making plans.</p><a class="dialog-action" href="https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026" target="_blank" rel="noopener noreferrer">Visit the source ↗</a>');
 $('#close-dialog').onclick = () => $('#detail-dialog').close();

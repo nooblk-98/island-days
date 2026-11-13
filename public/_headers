@@ -11,3 +11,8 @@
   Content-Type: text/calendar; charset=utf-8
   Cache-Control: public, max-age=3600
   Access-Control-Allow-Origin: *
+/widget/*
+  ! X-Frame-Options
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors *; form-action 'none'
+  Cache-Control: public, max-age=3600
