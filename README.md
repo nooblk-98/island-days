@@ -13,7 +13,7 @@
   ![Monthly updates](https://img.shields.io/badge/Holiday_refresh-Monthly-417e38)
 </div>
 
-![Island Days calendar with upcoming Sri Lanka holidays and a year summary](docs/preview.jpg)
+![Island Days calendar with upcoming Sri Lanka holidays and a year summary](docs/preview.png)
 
 ## Overview
 
@@ -23,20 +23,20 @@ The project is maintained by [nooblk-98](https://github.com/nooblk-98), with hol
 
 ## Features
 
-- **Month, year, and list views** — browse one month, see the year at a glance, or search the full holiday list.
-- **Poya day highlights** — distinct colours and filters for Poya days and other public holidays.
-- **Upcoming holidays** — a next-holiday countdown and a short list of dates to look forward to.
-- **Bank and mercantile holidays** — each holiday shows whether it is also a bank or mercantile (private-sector) holiday, using the official codes from the Central Bank's list, with a Mercantile filter.
-- **Long weekends and leave breaks** — the calendar bands breaks of three days or more, solid when no leave is needed and dashed when one to five leave days would join a holiday to the weekend.
-- **Your days off** — choose all public holidays or mercantile only, a Monday–Friday or Monday–Saturday week, and how many leave days you can take. Settings stay in your browser.
-- **Leave planner** — the best-value leave ideas for the year, each downloadable as a calendar event that blocks the whole break.
-- **Shareable links** — the address keeps the month, view, filter and open holiday, so any view can be bookmarked or sent.
-- **Light and dark themes** — follows your system setting, with a toggle in the header.
-- **Live calendar subscriptions** — subscribe to [`/holidays.ics`](https://dayoff.itsnooblk.com/holidays.ics) or [`/holidays-mercantile.ics`](https://dayoff.itsnooblk.com/holidays-mercantile.ics) in Apple Calendar, Outlook or Google Calendar and receive updates automatically.
-- **Calendar downloads** — export a single holiday or a full year as a one-time `.ics` import.
-- **Search-friendly** — a 1200×630 link preview (`npm run og` regenerates it from `scripts/og.html`), `robots.txt`, `sitemap.xml`, and structured data for upcoming holidays. Set `SITE_URL` when building for another domain.
-- **Transparent data status** — last-checked dates, source links, and overdue-update notices.
-- **Responsive and accessible** — phone-friendly layouts, keyboard focus, accessible dialogs, reduced-motion support, and print styling.
+- **Month, year, and list views**: browse one month, see the year at a glance, or search the full holiday list.
+- **Poya day highlights**: distinct colours and filters for Poya days and other public holidays.
+- **Upcoming holidays**: a next-holiday countdown and a short list of dates to look forward to.
+- **Bank and mercantile holidays**: each holiday shows whether it is also a bank or mercantile (private-sector) holiday, using the official codes from the Central Bank's list, with a Mercantile filter.
+- **Long weekends and leave breaks**: the calendar bands breaks of three days or more, solid when no leave is needed and dashed when one to five leave days would join a holiday to the weekend.
+- **Your days off**: choose all public holidays or mercantile only, a Monday–Friday or Monday–Saturday week, and how many leave days you can take. Settings stay in your browser.
+- **Leave planner**: the best-value leave ideas for the year, each downloadable as a calendar event that blocks the whole break.
+- **Shareable links**: the address keeps the month, view, filter and open holiday, so any view can be bookmarked or sent.
+- **Light and dark themes**: follows your system setting, with a toggle in the header.
+- **Live calendar subscriptions**: subscribe to [`/holidays.ics`](https://dayoff.itsnooblk.com/holidays.ics) or [`/holidays-mercantile.ics`](https://dayoff.itsnooblk.com/holidays-mercantile.ics) in Apple Calendar, Outlook or Google Calendar and receive updates automatically.
+- **Calendar downloads**: export a single holiday or a full year as a one-time `.ics` import.
+- **Search-friendly**: a 1200×630 link preview (`npm run og` regenerates it from `scripts/og.html`; `npm run banner` retakes this README screenshot while `npm run dev` is running), `robots.txt`, `sitemap.xml`, and structured data for upcoming holidays. Set `SITE_URL` when building for another domain.
+- **Transparent data status**: last-checked dates, source links, and overdue-update notices.
+- **Responsive and accessible**: phone-friendly layouts, keyboard focus, accessible dialogs, reduced-motion support, and print styling.
 
 ## Maintained, with care
 
