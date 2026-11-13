@@ -90,8 +90,18 @@ function spanDays(spans) {
   for (const s of spans) for (let d = s.start; d <= s.end; d = addDays(d, 1)) days.set(d, { ...s, first: d === s.start, last: d === s.end, isLeave: s.leaveDates?.includes(d) });
   return days;
 }
+// Every break the visitor could take, with overlaps resolved: where breaks share days only the
+// longest is kept (fewer leave days wins a tie), so the calendar never stacks one band on another.
+function yourBreaks() {
+  const all = [...yourLongWeekends().map(w => ({ ...w, leave: 0, leaveDates: [] })), ...yourLeavePlans()];
+  all.sort((a, b) => b.days - a.days || a.leave - b.leave || a.start.localeCompare(b.start));
+  const kept = [];
+  for (const s of all) if (!kept.some(k => s.start <= k.end && k.start <= s.end)) kept.push(s);
+  return kept.sort((a, b) => a.start.localeCompare(b.start));
+}
 function breakDays() {
-  return { weekends: spanDays(yourLongWeekends()), leave: spanDays(yourLeavePlans()) };
+  const breaks = yourBreaks();
+  return { weekends: spanDays(breaks.filter(b => !b.leave)), leave: spanDays(breaks.filter(b => b.leave)) };
 }
 const isOff = date => isWeekend(date, weekendDays());
 const spanClass = (info, column, prefix) => info ? ` ${prefix}${info.first || column === 0 ? ` ${prefix}-start` : ''}${info.last || column === 6 ? ` ${prefix}-end` : ''}${column === 0 && !info.first ? ` ${prefix}-wrap-in` : ''}${column === 6 && !info.last ? ` ${prefix}-wrap-out` : ''}` : '';
@@ -104,8 +114,9 @@ function monthBreaks() {
   const prefix = `${state.year}-${String(state.month + 1).padStart(2, '0')}`;
   const inMonth = s => s.start.slice(0, 7) <= prefix && s.end.slice(0, 7) >= prefix;
   const range = s => `${shortDate(s.start, { weekday: 'short' })} – ${shortDate(s.end, { weekday: 'short' })}`;
-  const leave = yourLeavePlans().filter(inMonth).map(p => ({ start: p.start, past: p.end < today, html: `<button class="break-item is-leave-plan" data-break="${p.start}"><span class="break-body">${breakBadges(p.days, p.leave)}<span class="break-text"><strong>Take ${p.leaveDates.map(d => shortDate(d, { weekday: 'short' })).join(' and ')} off</strong><small>${range(p)}</small></span></span><span class="break-go" aria-hidden="true">›</span></button>` }));
-  const free = yourLongWeekends().filter(inMonth).map(w => ({ start: w.start, past: w.end < today, html: `<div class="break-item is-free"><span class="break-body">${breakBadges(w.days)}<span class="break-text"><strong>Long weekend</strong><small>${range(w)}</small></span></span></div>` }));
+  const breaks = yourBreaks().filter(inMonth);
+  const leave = breaks.filter(b => b.leave).map(p => ({ start: p.start, past: p.end < today, html: `<button class="break-item is-leave-plan" data-break="${p.start}"><span class="break-body">${breakBadges(p.days, p.leave)}<span class="break-text"><strong>Take ${p.leaveDates.map(d => shortDate(d, { weekday: 'short' })).join(' and ')} off</strong><small>${range(p)}</small></span></span><span class="break-go" aria-hidden="true">›</span></button>` }));
+  const free = breaks.filter(b => !b.leave).map(w => ({ start: w.start, past: w.end < today, html: `<div class="break-item is-free"><span class="break-body">${breakBadges(w.days)}<span class="break-text"><strong>Long weekend</strong><small>${range(w)}</small></span></span></div>` }));
   const items = [...leave, ...free].sort((a, b) => a.start.localeCompare(b.start));
   const body = items.length ? items.map(i => i.past ? i.html.replace('class="break-item', 'class="break-item is-past') : i.html).join('') : '<p class="break-empty">No long weekends or leave ideas this month.</p>';
   return `<section class="month-breaks" aria-label="Breaks this month"><h3>Breaks this month</h3>${body}</section>`;
@@ -143,10 +154,7 @@ function renderMonth() {
     const plan = breaks.leave.get(cell.date);
     const day = `cal-day${breakClass(breaks, cell.date, index % 7)}`;
     const span = plan || info;
-    const wrapsIn = index % 7 === 0 && span && !span.first;
-    const wrapsOut = index % 7 === 6 && span && !span.last;
-    const spanLabel = span && (span.start.slice(0, 7) === span.end.slice(0, 7) ? `${Number(span.start.slice(-2))}–${Number(span.end.slice(-2))}` : `${shortDate(span.start)}–${shortDate(span.end)}`);
-    const continuation = wrapsIn || wrapsOut ? `<span class="break-wrap" aria-hidden="true" title="${esc(`Same break: ${shortDate(span.start)} – ${shortDate(span.end)}`)}">${wrapsIn ? '↳ ' : ''}${esc(spanLabel)}${wrapsOut ? ' ↴' : ''}</span>` : '';
+    const continuation = '';
     const cls = ['cal-dot', isOff(cell.date) && 'is-weekend', plan?.isLeave && 'is-leave', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', isToday && 'is-today'].filter(Boolean).join(' ');
     const current = isToday ? ' aria-current="date"' : '';
     const breakNote = info ? `, part of a ${info.days}-day long weekend` : '';
