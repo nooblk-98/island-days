@@ -139,7 +139,7 @@ function renderMonth() {
     const names = events.map(h => holidayDisplayName(h));
     return `<div class="${day}"><button class="${cls}" data-date="${cell.date}"${current} aria-label="${esc(`${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${names.join(', ')}${breakNote}`)}">${cell.day}</button><span class="cal-name" aria-hidden="true">${esc(names.join(' · '))}</span></div>`;
   }).join('');
-  $('#calendar').innerHTML = `<div class="cal${prefs.saturday ? ' works-saturday' : ''}"><div class="cal-weekdays">${weekdays}</div><div class="cal-grid">${days}</div>${monthBreaks()}</div>`;
+  $('#calendar').innerHTML = `<div class="cal${prefs.saturday ? ' works-saturday' : ''}"><div class="cal-weekdays">${weekdays}</div><div class="cal-grid">${days}</div></div>${monthBreaks()}`;
 }
 function renderYear() {
   const holidays = yearHolidays().filter(matches);

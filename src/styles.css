@@ -3464,11 +3464,31 @@ select:focus-visible {
 }
 /* Compact desktop calendar, retaining a consistent two-line holiday label slot. */
 @media (min-width: 601px) {
-  .cal { --dot: 36px; padding: 18px 16px 14px; }
-  .cal-grid { grid-auto-rows: minmax(74px, 1fr); row-gap: 8px; }
-  .cal .cal-dot { width: 36px; height: 36px; font-size: 13px; }
-  .cal .cal-name { margin-top: 6px; font-size: 12px; line-height: 1.2; }
+  .cal { --dot: clamp(48px, 5vw, 72px); padding: 18px 16px 14px; }
+  .cal-grid { grid-auto-rows: minmax(calc(var(--dot) + 32px), 1fr); row-gap: 4px; }
+  .cal .cal-dot { width: var(--dot); height: var(--dot); font-size: clamp(18px, 1.667vw, 24px); }
+  .cal .cal-name { margin-top: 4px; font-size: 12px; line-height: 1.2; }
   .cal .month-breaks { margin-top: 14px; padding-top: 14px; }
   .month-breaks .break-item { padding: 12px 14px; }
   .month-breaks .break-body { gap: 8px; }
+}
+@media (min-width: 361px) and (max-width: 600px) {
+  .cal { --dot: 44px; }
+  .cal .cal-dot { width: 44px; height: 44px; font-size: 16px; }
+  .cal-grid { grid-auto-rows: minmax(56px, 1fr); row-gap: 10px; }
+}
+@media (max-width: 360px) {
+  .cal { --dot: 36px; }
+  .cal .cal-dot { width: 36px; height: 36px; font-size: 15px; }
+}
+/* A focused calendar width; leave suggestions sit outside the date-grid card. */
+@media (min-width: 901px) {
+  .workspace { max-width: 1064px; margin-inline: auto; }
+}
+@media (min-width: 601px) {
+  .cal { padding: 12px 12px 10px; }
+  .cal .cal-weekdays { margin-bottom: 10px; }
+  #calendar > .month-breaks { margin-top: 16px; padding-top: 0; border-top: 0; }
+  #calendar > .month-breaks .break-body { display: flex; align-items: center; gap: 16px; }
+  #calendar > .month-breaks .break-item { padding: 12px 14px; }
 }
