@@ -1375,6 +1375,7 @@ dialog::backdrop {
 }
 .cal-grid {
   row-gap: 12px;
+  grid-auto-rows: minmax(90px, 1fr);
 }
 .cal-day,
 .cal-dot {
@@ -3411,7 +3412,7 @@ select:focus-visible {
   .holiday-scope .filter { flex: 1; padding: 10px 12px; justify-content: center; font-size: 13px; }
   .filter-toolbar { align-items: stretch; gap: 0; margin-bottom: 18px; }
   .cal { padding: 20px 7px 16px; }
-  .cal-grid { row-gap: 12px; }
+  .cal-grid { row-gap: 12px; grid-auto-rows: minmax(50px, 1fr); }
   .cal-weekdays > span { font-size: 10px; }
   .legend { gap: 14px; width: 100%; }
   .legend-group { width: 100%; gap: 10px 13px; }
@@ -3427,4 +3428,27 @@ select:focus-visible {
   .month-navigation .today-button { justify-self: end; }
   .holiday-scope .filter { padding-left: 8px; padding-right: 8px; font-size: 12px; }
   .legend-group { gap: 10px; }
+}
+/* Equal calendar rows and clear, separate break benefits and leave costs. */
+.month-breaks .break-item {
+  padding: 16px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--calendar-surface);
+}
+.month-breaks .break-item + .break-item { margin-top: 10px; }
+.month-breaks button.break-item:hover { background: var(--control-hover); border-color: var(--control-border); }
+.break-body { display: grid; gap: 10px; flex: 1; min-width: 0; }
+.break-metrics { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+.break-metric { display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 6px 10px; border: 1px solid transparent; border-radius: var(--r-pill); font-size: 12px; line-height: 1.25; white-space: nowrap; }
+.break-metric b { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.break-metric.off { background: var(--holiday-fill); color: var(--holiday-ink); }
+.break-metric.leave { border-color: var(--leave-ring); color: var(--leave-ring); }
+.break-metric.no-leave { border-color: var(--control-border); color: var(--muted-ink); }
+.weekend-row .break-metrics { justify-content: flex-end; }
+@media (max-width: 600px) {
+  .month-breaks .break-item { padding: 13px; }
+  .weekend-row:has(.break-metrics) { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .weekend-row .break-metrics { justify-content: flex-start; }
 }

@@ -85,13 +85,16 @@ function breakDays() {
 const isOff = date => isWeekend(date, weekendDays());
 const spanClass = (info, column, prefix) => info ? ` ${prefix}${info.first || column === 0 ? ` ${prefix}-start` : ''}${info.last || column === 6 ? ` ${prefix}-end` : ''}` : '';
 const breakClass = (breaks, date, column) => spanClass(breaks.weekends.get(date), column, 'lw') + spanClass(breaks.leave.get(date), column, 'lp');
+function breakBadges(days, leave = 0) {
+  return `<span class="break-metrics"><span class="break-metric off"><b>${days}</b> days off</span><span class="break-metric ${leave ? 'leave' : 'no-leave'}">${leave ? `<b>${leave}</b> leave day${leave === 1 ? '' : 's'}` : 'No leave needed'}</span></span>`;
+}
 // Plain-language list of this month's breaks, so nobody has to decode the bands.
 function monthBreaks() {
   const prefix = `${state.year}-${String(state.month + 1).padStart(2, '0')}`;
   const inMonth = s => s.start.slice(0, 7) <= prefix && s.end.slice(0, 7) >= prefix;
   const range = s => `${shortDate(s.start, { weekday: 'short' })} – ${shortDate(s.end, { weekday: 'short' })}`;
-  const leave = yourLeavePlans().filter(inMonth).map(p => ({ start: p.start, past: p.end < today, html: `<button class="break-item is-leave-plan" data-break="${p.start}"><span class="break-days"><b>${p.days}</b>days</span><span class="break-text"><strong>Take ${p.leaveDates.map(d => shortDate(d, { weekday: 'short' })).join(' and ')} off</strong><small>${range(p)} · ${p.days} days off for ${p.leave} leave day${p.leave === 1 ? '' : 's'}</small></span><span class="break-go" aria-hidden="true">›</span></button>` }));
-  const free = yourLongWeekends().filter(inMonth).map(w => ({ start: w.start, past: w.end < today, html: `<div class="break-item is-free"><span class="break-days"><b>${w.days}</b>days</span><span class="break-text"><strong>No leave needed</strong><small>${range(w)} · ${w.days} days off</small></span></div>` }));
+  const leave = yourLeavePlans().filter(inMonth).map(p => ({ start: p.start, past: p.end < today, html: `<button class="break-item is-leave-plan" data-break="${p.start}"><span class="break-body">${breakBadges(p.days, p.leave)}<span class="break-text"><strong>Take ${p.leaveDates.map(d => shortDate(d, { weekday: 'short' })).join(' and ')} off</strong><small>${range(p)}</small></span></span><span class="break-go" aria-hidden="true">›</span></button>` }));
+  const free = yourLongWeekends().filter(inMonth).map(w => ({ start: w.start, past: w.end < today, html: `<div class="break-item is-free"><span class="break-body">${breakBadges(w.days)}<span class="break-text"><strong>Long weekend</strong><small>${range(w)}</small></span></span></div>` }));
   const items = [...leave, ...free].sort((a, b) => a.start.localeCompare(b.start));
   const body = items.length ? items.map(i => i.past ? i.html.replace('class="break-item', 'class="break-item is-past') : i.html).join('') : '<p class="break-empty">No long weekends or leave ideas this month.</p>';
   return `<section class="month-breaks" aria-label="Breaks this month"><h3>Breaks this month</h3>${body}</section>`;
@@ -294,7 +297,7 @@ $('#export').onclick = () => { if (data) download(yearHolidays().filter(holidayS
 $('#weekend-button').onclick = () => {
   if (!data) return;
   const weekends = yourLongWeekends();
-  openDialog(`<span class="dialog-symbol" aria-hidden="true">↟</span><h2 id="dialog-title" class="dialog-heading">A longer little break.</h2><p class="dialog-body">${state.year} breaks of three days or more, combining ${state.filter === 'mercantile' ? 'mercantile' : 'public'} holidays with your ${prefs.saturday ? 'Sunday' : 'Saturday and Sunday'}. No extra leave days included.${isEstimated(state.year) ? ' Holiday dates for this year are estimates.' : ''}</p>${weekends.map(w => `<div class="weekend-row"><span>${formatDate(w.start, { day: 'numeric', month: 'short' })} – ${formatDate(w.end, { day: 'numeric', month: 'short' })}<small>${formatDate(w.start, { weekday: 'long' })} to ${formatDate(w.end, { weekday: 'long' })}</small></span><strong>${w.days}<small>days off</small></strong></div>`).join('') || '<p class="dialog-body">No long weekends are listed for this year yet.</p>'}<p class="dialog-body">Your working week and holiday entitlement may differ. Verify dates before booking.</p>`);
+  openDialog(`<span class="dialog-symbol" aria-hidden="true">↟</span><h2 id="dialog-title" class="dialog-heading">A longer little break.</h2><p class="dialog-body">${state.year} breaks of three days or more, combining ${state.filter === 'mercantile' ? 'mercantile' : 'public'} holidays with your ${prefs.saturday ? 'Sunday' : 'Saturday and Sunday'}. No extra leave days included.${isEstimated(state.year) ? ' Holiday dates for this year are estimates.' : ''}</p>${weekends.map(w => `<div class="weekend-row"><span>${formatDate(w.start, { day: 'numeric', month: 'short' })} – ${formatDate(w.end, { day: 'numeric', month: 'short' })}<small>${formatDate(w.start, { weekday: 'long' })} to ${formatDate(w.end, { weekday: 'long' })}</small></span>${breakBadges(w.days)}</div>`).join('') || '<p class="dialog-body">No long weekends are listed for this year yet.</p>'}<p class="dialog-body">Your working week and holiday entitlement may differ. Verify dates before booking.</p>`);
 };
 function prefsControls() {
   const group = (label, key, options) => `<div class="pref-group"><span class="pref-label" id="pref-${key}">${label}</span><div class="filters" role="group" aria-labelledby="pref-${key}">${options.map(([value, text]) => {
@@ -305,7 +308,7 @@ function prefsControls() {
 }
 function plannerContent() {
   const plans = yourLeavePlans(state.year === thisYear ? today : '');
-  const rows = plans.map(p => `<div class="weekend-row plan-row"><span>Take ${p.leaveDates.map(d => shortDate(d, { weekday: 'short' })).join(', ')} off<small>${shortDate(p.start, { weekday: 'short' })} – ${shortDate(p.end, { weekday: 'short' })}</small><button class="feed-link" data-plan="${p.start}">↓ Add break to my calendar</button></span><strong>${p.days}<small>days off for ${p.leave} leave day${p.leave === 1 ? '' : 's'}</small></strong></div>`).join('');
+  const rows = plans.map(p => `<div class="weekend-row plan-row"><span>Take ${p.leaveDates.map(d => shortDate(d, { weekday: 'short' })).join(', ')} off<small>${shortDate(p.start, { weekday: 'short' })} – ${shortDate(p.end, { weekday: 'short' })}</small><button class="feed-link" data-plan="${p.start}">↓ Add break to my calendar</button></span>${breakBadges(p.days, p.leave)}</div>`).join('');
   return `<span class="dialog-symbol" aria-hidden="true">✦</span><h2 id="dialog-title" class="dialog-heading">More days off, less leave.</h2><p class="dialog-body">Leave days that join ${state.year} holidays to your weekend. The best value for each break is shown.${isEstimated(state.year) ? ' Holiday dates for this year are estimates.' : ''}</p>${prefsControls()}${rows || `<p class="dialog-body">No leave ideas ${state.year === thisYear ? 'left ' : ''}for ${state.year}.</p>`}<p class="dialog-body">Your leave rules may differ. Verify dates before booking.</p>`;
 }
 let withReminders = true;
