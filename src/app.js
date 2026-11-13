@@ -5,6 +5,17 @@ const today = colomboToday();
 const thisYear = Number(today.slice(0, 4));
 let data, availableYears = [], focusedBeforeDialog, toastTimer, lastURL = '';
 const state = { year: thisYear, month: Number(today.slice(5, 7)) - 1, view: 'month', filter: 'all', search: '' };
+const calendarKey = $('.calendar-bottom');
+const keyBesideCalendar = window.matchMedia('(min-width: 901px)');
+function positionCalendarKey() {
+  if (state.view === 'list') { calendarKey.remove(); return; }
+  if (keyBesideCalendar.matches) $('.sidebar').prepend(calendarKey);
+  else {
+    const dates = $('#calendar > .cal, #calendar > .year-grid');
+    if (dates) dates.after(calendarKey);
+  }
+}
+keyBesideCalendar.addEventListener('change', positionCalendarKey);
 // Personal settings, remembered in this browser only.
 const PREFS_KEY = 'island-days:prefs';
 const prefs = { holidays: 'all', saturday: false, maxLeave: 3 };
@@ -183,6 +194,7 @@ function render() {
   if (state.view === 'month') renderMonth();
   else if (state.view === 'year') renderYear();
   else $('#calendar').innerHTML = selected.length ? `<div class="holiday-list">${selected.map(h => holidayRow(h, true)).join('')}</div>` : '<div class="empty-state">No holidays match your search.<br>Try another name or choose “All public holidays”.</div>';
+  positionCalendarKey();
   const coming = selected.filter(h => state.year === thisYear ? h.date >= today : true);
   $('#upcoming-count').textContent = state.search ? `${coming.length} found` : `${state.year}`;
   $('#upcoming-list').innerHTML = coming.length ? coming.slice(0, 3).map(h => holidayRow(h)).join('') : '<p class="empty-state">No upcoming holidays match.<br>Explore the full year below.</p>';

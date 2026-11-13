@@ -1,9 +1,22 @@
 import http from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, mkdir } from 'node:fs/promises';
+import { DatabaseSync } from 'node:sqlite';
+import { onRequest } from '../functions/api/visits.js';
 import { resolve, extname, sep } from 'node:path';
 const root = resolve('dist');
+// Keep preview visits in a separate local database, never in the production total.
+await mkdir('.wrangler', { recursive: true });
+const visits = new DatabaseSync('.wrangler/preview-visits.sqlite');
+visits.exec(await readFile(new URL('../schema.sql', import.meta.url), 'utf8'));
+const VISITS_DB = { prepare: sql => ({ first: async () => visits.prepare(sql).get() }) };
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.ics': 'text/calendar', '.xml': 'application/xml', '.txt': 'text/plain', '.jpg': 'image/jpeg' };
 http.createServer(async (req, res) => {
+  if (new URL(req.url, 'http://localhost').pathname === '/api/visits') {
+    const response = await onRequest({ request: new Request(`http://${req.headers.host}${req.url}`, { method: req.method, headers: req.headers }), env: { VISITS_DB } });
+    res.writeHead(response.status, Object.fromEntries(response.headers));
+    res.end(await response.text());
+    return;
+  }
   const path = resolve(root, `.${decodeURIComponent(new URL(req.url, 'http://localhost').pathname)}`);
   if (path !== root && !path.startsWith(root + sep)) { res.writeHead(403).end(); return; }
   try {

@@ -3466,3 +3466,34 @@ select:focus-visible {
   #calendar > .month-breaks .break-body { display: flex; align-items: center; gap: 16px; }
   #calendar > .month-breaks .break-item { padding: 12px 14px; }
 }
+/* A quiet digital clock, with fixed-width numerals so seconds never shift the header. */
+.sri-clock { display: grid; gap: 5px; padding-left: 18px; border-left: 1px solid var(--line); }
+.clock-label { display: flex; align-items: center; gap: 6px; font-size: 9px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted-ink); }
+.clock-live { width: 5px; height: 5px; border-radius: 50%; background: #7c9b74; }
+.clock-digits { display: flex; align-items: baseline; font-family: 'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace; font-size: 22px; font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.8px; }
+.clock-colon { color: var(--muted-ink); padding-inline: 2px; }
+.clock-seconds { color: var(--poya); }
+[data-theme="dark"] .clock-seconds { color: #d9bf77; }
+.visit-counter:not([hidden]) { display: inline-flex; align-items: center; gap: 6px; }
+.visit-counter svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 1.3; }
+.visit-counter strong { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.footer-bottom { flex-wrap: wrap; align-items: center; }
+@media (min-width: 601px) and (max-width: 1100px) {
+  .sri-clock { padding-left: 10px; }
+  .clock-digits { font-size: 18px; }
+  .header-end { gap: 8px; }
+}
+@media (max-width: 600px) {
+  .site-header .header-end { display: contents; }
+  .site-header .theme-toggle { grid-column: 2; grid-row: 1; justify-self: end; }
+  .sri-clock { grid-column: 1 / -1; grid-row: 3; display: flex; justify-content: center; align-items: center; gap: 12px; padding: 12px 0; border-left: 0; border-top: 1px solid var(--line); }
+  .clock-label { font-size: 9px; letter-spacing: 0.9px; }
+  .clock-digits { font-size: 20px; }
+}
+@media print { .sri-clock, .visit-counter { display: none !important; } }
+/* Keep the key beside desktop dates and immediately below them on smaller screens. */
+.sidebar > .calendar-bottom { padding: 0 0 20px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
+.sidebar .legend { width: 100%; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.sidebar .legend-group { grid-column: auto; grid-template-columns: minmax(0, 1fr); gap: 10px; align-content: start; }
+.sidebar .legend-group > span:not(.legend-label) { font-size: 12px; }
+#calendar > .calendar-bottom + .month-breaks { margin-top: 0; }

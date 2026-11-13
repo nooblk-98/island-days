@@ -8,7 +8,7 @@ const site = (process.env.SITE_URL || 'https://dayoff.itsnooblk.com').replace(/\
 const dist = new URL('../dist/', import.meta.url);
 await mkdir(dist, { recursive: true });
 await cp(new URL('../public/', import.meta.url), dist, { recursive: true });
-for (const file of ['app.js', 'styles.css', 'calendar.js', 'theme.js']) {
+for (const file of ['app.js', 'site.js', 'styles.css', 'calendar.js', 'theme.js']) {
   await cp(new URL(`../src/${file}`, import.meta.url), new URL(file, dist));
 }
 // Embeddable next-holiday widget (served at /widget/, allowed inside other sites by _headers).
@@ -52,6 +52,8 @@ const jsonLd = [
   ] }
 ];
 const template = await readFile(new URL('../src/index.html', import.meta.url), 'utf8');
+const visitCounter = template.match(/<span class="visit-counter"[\s\S]*?<\/svg>[\s\S]*?<\/span><\/span>/)?.[0];
+if (!visitCounter) throw new Error('Visit counter markup is missing');
 const page = template.replaceAll('__SITE__', site).replaceAll('__TITLE__', esc(title)).replaceAll('__DESCRIPTION__', esc(description)).replace('__VERIFY__', verify);
 await writeFile(new URL('index.html', dist), page.replace('</head>', ldScript(jsonLd)));
 // The not-found page reuses the app but must never be indexed.
@@ -102,6 +104,7 @@ for (const year of years) {
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <script src="/theme.js"></script>
+  <script type="module" src="/site.js"></script>
   <link rel="stylesheet" href="/styles.css">
 ${ldScript(yearLd)}
 <body class="year-page">
@@ -128,7 +131,7 @@ ${weekendRows || '      <li>No long weekends this year.</li>'}
     ${others ? `<p class="other-years">Also see: ${others}</p>` : ''}
     <p class="small-note">Last checked ${formatDate(lastmod, { day: 'numeric', month: 'long', year: 'numeric' })}. The government can declare or move holidays after the gazette, so please verify before booking.</p>
   </main>
-  <footer class="site-footer"><div class="footer-bottom"><span>Island Days by <a href="https://github.com/nooblk-98" rel="noopener">Lahiru Sandaruwan</a></span><a href="/">Back to the calendar</a></div></footer>
+  <footer class="site-footer"><div class="footer-bottom"><span>Island Days by <a href="https://github.com/nooblk-98" rel="noopener">Lahiru Sandaruwan</a></span>${visitCounter}<a href="/">Back to the calendar</a></div></footer>
 </body>
 </html>
 `;
@@ -147,7 +150,7 @@ const calendarV = await fingerprint('calendar.js');
 await rewrite('app.js', [["from './calendar.js'", `from './calendar.js?v=${calendarV}'`]]);
 await rewrite('widget/widget.js', [["from '/calendar.js'", `from '/calendar.js?v=${calendarV}'`]]);
 const assets = {};
-for (const file of ['styles.css', 'theme.js', 'app.js', 'widget/widget.css', 'widget/widget.js']) assets[file] = await fingerprint(file);
+for (const file of ['styles.css', 'theme.js', 'site.js', 'app.js', 'widget/widget.css', 'widget/widget.js']) assets[file] = await fingerprint(file);
 const htmlPages = ['index.html', '404.html', 'widget/index.html', ...years.map(y => `sri-lanka-holidays-${y}/index.html`)];
 for (const page of htmlPages) await rewrite(page, Object.entries(assets).map(([file, v]) => [`"/${file}"`, `"/${file}?v=${v}"`]));
 console.log(`Built Island Days with ${data.holidays.length} holidays across ${years.join(', ')} for ${site}, plus ${years.length} yearly pages.`);

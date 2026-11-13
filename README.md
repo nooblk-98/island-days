@@ -32,6 +32,8 @@ The project is maintained by [nooblk-98](https://github.com/nooblk-98), with hol
 - **Leave planner**: the best-value leave ideas for the year, each downloadable as a calendar event that blocks the whole break.
 - **Shareable links**: the address keeps the month, view, filter and open holiday, so any view can be bookmarked or sent.
 - **Light and dark themes**: follows your system setting, with a toggle in the header.
+- **Sri Lanka time, live**: a digital header clock shows local time in Asia/Colombo, including seconds, wherever you are browsing from.
+- **Public visit count**: a shared total in the footer counts visits to the calendar and yearly holiday pages, including repeat visits, from the counter's launch date. It stores only the total and start date, with no visitor identifiers.
 - **Live calendar subscriptions**: subscribe to [`/holidays.ics`](https://dayoff.itsnooblk.com/holidays.ics) or [`/holidays-mercantile.ics`](https://dayoff.itsnooblk.com/holidays-mercantile.ics) in Apple Calendar, Outlook or Google Calendar and receive updates automatically.
 - **Calendar downloads**: export a single holiday or a full year as a one-time `.ics` import.
 - **Search-friendly**: a crawlable page per year ([2026](https://dayoff.itsnooblk.com/sri-lanka-holidays-2026/), [2027](https://dayoff.itsnooblk.com/sri-lanka-holidays-2027/)) with a full holiday table, keyword-rich titles and descriptions, WebSite, WebApplication, Dataset and breadcrumb structured data, `robots.txt` and `sitemap.xml`, and a 1200×630 link preview (`npm run og`; `npm run banner` retakes this README screenshot while `npm run dev` is running). Set the `GOOGLE_SITE_VERIFICATION` or `BING_SITE_VERIFICATION` repository variable to add a search console verification tag, and `SITE_URL` when building for another domain.
@@ -48,7 +50,7 @@ Dates use **Asia/Colombo**, independently of the visitor’s browser timezone. P
 
 **HTML · CSS · Vanilla JavaScript · Node.js · Cheerio · GitHub Actions · Cloudflare Pages**
 
-A static website with no frontend framework, database, visitor accounts, cookies, or external fonts. Visits are counted with cookie-free [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/), which does not track individuals.
+A static calendar with no frontend framework, visitor accounts, cookies, or external fonts. A small Cloudflare Pages Function and D1 database maintain the public visit total. Local previews use a separate SQLite counter. Cookie-free [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/) remains available for site analytics.
 
 > [!NOTE]
 > The government can declare or move holidays after the gazette, and the calendar picks up changes when the Central Bank updates its list. Verify dates and working arrangements before booking. Downloads are one-time imports; use a subscription to receive changes.
