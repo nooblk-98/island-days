@@ -56,8 +56,8 @@ jobs:
         if: steps.settings.outputs.ready == 'true' && github.event_name != 'push'
         shell: bash
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git config user.name 'Lahiru S Liyanage'
+          git config user.email '125950957+nooblk-98@users.noreply.github.com'
           git add public/data/holidays.json
           if ! git diff --staged --quiet; then
             git commit -m 'Update Sri Lanka holiday data [skip ci]'
