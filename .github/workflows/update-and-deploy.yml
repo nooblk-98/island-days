@@ -48,12 +48,12 @@ jobs:
           fi
       - run: npm ci --no-audit --no-fund
       - name: Fetch and validate holiday source
-        if: steps.settings.outputs.ready == 'true'
+        if: steps.settings.outputs.ready == 'true' && github.event_name != 'push'
         run: npm run refresh
       - run: npm test
       - run: npm run build
       - name: Save last successful data check
-        if: steps.settings.outputs.ready == 'true'
+        if: steps.settings.outputs.ready == 'true' && github.event_name != 'push'
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
