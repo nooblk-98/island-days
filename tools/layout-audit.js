@@ -113,3 +113,25 @@ window.__audit = function audit(label) {
   return { label, count: issues.length, issues: [...new Set(issues)] };
 };
 'audit loaded';
+
+// Year view: bands centred on their dots, rows never touching, and open ends where a break wraps rows.
+window.__auditYear = function auditYear() {
+  const problems = [];
+  for (const month of document.querySelectorAll('.mini-month')) {
+    const name = month.querySelector('h3').textContent;
+    const bands = [...month.querySelectorAll('.mini-dates > span.lw, .mini-dates > span.lp')].map(span => {
+      const s = getComputedStyle(span, span.classList.contains('lp') ? '::after' : '::before');
+      const cell = span.getBoundingClientRect(), dot = span.querySelector('.mini-dot').getBoundingClientRect();
+      const shift = s.transform === 'none' ? 0 : new DOMMatrix(s.transform).m42;
+      const top = cell.top + parseFloat(s.top) + shift, bottom = top + parseFloat(s.height);
+      const left = cell.left + parseFloat(s.left), right = cell.right - parseFloat(s.right);
+      const off = (top + bottom) / 2 - (dot.top + dot.bottom) / 2;
+      if (Math.abs(off) > 1) problems.push(`${name} ${span.textContent}: band off-centre by ${Math.round(off)}px`);
+      if (span.matches('.lw-wrap-out, .lp-wrap-out') && right < cell.right) problems.push(`${name} ${span.textContent}: not open at row end`);
+      if (span.matches('.lw-wrap-in, .lp-wrap-in') && left > cell.left) problems.push(`${name} ${span.textContent}: not open at row start`);
+      return { top, bottom, row: Math.round(dot.top) };
+    });
+    for (const a of bands) for (const b of bands) if (b.row > a.row && b.top < a.bottom + 1) problems.push(`${name}: bands in neighbouring rows touch`);
+  }
+  return [...new Set(problems)];
+};

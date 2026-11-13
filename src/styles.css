@@ -3547,3 +3547,28 @@ select:focus-visible {
 @media (max-width: 600px) {
   .footer-bottom a { display: inline-block; padding: 9px 0; margin: -9px 0; }
 }
+
+/* Year view bands: centred on the dots, slim enough that rows never touch,
+   and open at row wraps so a break visibly continues onto the next row. */
+.mini-dates { row-gap: 6px; }
+.mini-dates > span.lw::before,
+.mini-dates > span.lp::after {
+  top: 50%;
+  transform: translateY(-50%);
+  height: calc(var(--mini) + 4px);
+}
+.mini-dates > span.lw-wrap-in::before,
+.mini-dates > span.lp-wrap-in::after {
+  left: -1px;
+  border-left: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.mini-dates > span.lw-wrap-out::before,
+.mini-dates > span.lp-wrap-out::after {
+  right: -1px;
+  border-right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+@media (max-width: 600px) { .mini-dates { row-gap: 6px; } }
