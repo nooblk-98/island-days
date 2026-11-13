@@ -6,6 +6,8 @@ on:
   schedule:
     # 05:47 Asia/Colombo on the first day of every month.
     - cron: '17 0 1 * *'
+    # A second attempt a week later in case the bank's site blocked or failed the first.
+    - cron: '17 0 8 * *'
   workflow_dispatch:
 
 concurrency:
@@ -50,10 +52,11 @@ jobs:
           fi
       - run: npm ci --no-audit --no-fund
       # Every run re-checks the Central Bank list so the site's "Last checked" date stays fresh.
-      # On a code push a source outage must not block the deploy, so the saved data is used instead.
+      # On a code push or manual run a source outage (or the bank's firewall) must not block the deploy,
+      # so the saved data is used. Scheduled runs still fail loudly so the problem is noticed.
       - name: Fetch and validate Central Bank holiday lists
         if: steps.settings.outputs.ready == 'true'
-        continue-on-error: ${{ github.event_name == 'push' }}
+        continue-on-error: ${{ github.event_name != 'schedule' }}
         run: npm run refresh
       - run: npm test
       - run: npm run build
