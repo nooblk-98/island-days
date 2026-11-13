@@ -16,7 +16,11 @@ const feeds = [
   { file: 'holidays.ics', holidays: data.holidays, name: 'Sri Lanka Public Holidays', description: 'Sri Lanka public, bank and Poya holidays from Island Days.' },
   { file: 'holidays-mercantile.ics', holidays: data.holidays.filter(h => holidayClass(h).mercantile), name: 'Sri Lanka Mercantile Holidays', description: 'Sri Lanka mercantile (private-sector) holidays from Island Days.' }
 ];
-for (const feed of feeds) await writeFile(new URL(feed.file, dist), createICS(feed.holidays, data.fetchedAt, data.years, { ...feed, feed: true }));
+for (const feed of feeds) {
+  await writeFile(new URL(feed.file, dist), createICS(feed.holidays, data.fetchedAt, data.years, { ...feed, feed: true }));
+  // Same feed with alerts a day and a week before each holiday.
+  await writeFile(new URL(feed.file.replace('.ics', '-reminders.ics'), dist), createICS(feed.holidays, data.fetchedAt, data.years, { ...feed, name: `${feed.name} (with reminders)`, feed: true, reminders: true }));
+}
 
 const lastmod = data.fetchedAt.slice(0, 10);
 const years = Object.keys(data.years).sort();

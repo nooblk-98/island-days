@@ -117,3 +117,12 @@ test('subscription feeds refresh daily and tag holiday types', () => {
   assert.match(ics, /REFRESH-INTERVAL;VALUE=DURATION:P1D/);
   assert.match(ics, /CATEGORIES:Public holiday,Bank holiday,Mercantile holiday/);
 });
+test('reminder feeds add a day-before and week-before alert to every holiday', () => {
+  const plain = createICS(data.holidays.slice(0, 3), data.fetchedAt, data.years, { feed: true });
+  const withAlerts = createICS(data.holidays.slice(0, 3), data.fetchedAt, data.years, { feed: true, reminders: true });
+  assert.equal((plain.match(/BEGIN:VALARM/g) || []).length, 0);
+  assert.equal((withAlerts.match(/BEGIN:VALARM/g) || []).length, 6);
+  assert.match(withAlerts, /TRIGGER:-PT15H/);
+  assert.match(withAlerts, /TRIGGER:-P6DT15H/);
+  assert.ok(withAlerts.split('\r\n').every(line => Buffer.byteLength(line) <= 75));
+});

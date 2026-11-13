@@ -61,6 +61,10 @@ function renderHero() {
   }
   const delta = daysBetween(today, next.date);
   $('#next-content').innerHTML = `<div class="next-date"><span class="next-day">${Number(next.date.slice(-2))}</span><span class="next-month">${MONTHS[Number(next.date.slice(5, 7)) - 1].slice(0, 3).toUpperCase()} ${next.date.slice(0, 4)}<br>${formatDate(next.date, { weekday: 'long' })}</span></div><h2 class="next-name">${esc(next.name)}</h2><span class="next-pill"><span aria-hidden="true">◷</span> ${delta === 0 ? 'A LITTLE PAUSE, TODAY' : `${delta} DAY${delta === 1 ? '' : 'S'} TO GO`}${isEstimated(next.date.slice(0, 4)) ? ' · ESTIMATED' : ''}</span>`;
+  // The next long weekend (no leave needed), following the visitor's own work week and holidays.
+  const source = prefs.holidays === 'mercantile' ? data.holidays.filter(isMercantile) : data.holidays;
+  const nextBreak = availableYears.filter(y => y >= thisYear).flatMap(y => longWeekends(source, y, { weekend: weekendDays() })).find(w => w.end >= today);
+  if (nextBreak) $('#next-content').insertAdjacentHTML('beforeend', `<p class="next-break"><span>Next long weekend</span><strong>${shortDate(nextBreak.start, { weekday: 'short' })} – ${shortDate(nextBreak.end, { weekday: 'short' })}</strong><em>${nextBreak.days} days off${nextBreak.start <= today ? ' · now' : ` · in ${daysBetween(today, nextBreak.start)} days`}</em></p>`);
   $('#next-holiday').disabled = false;
   $('#next-holiday').onclick = () => showHoliday(next.id);
   $('#next-holiday').setAttribute('aria-label', `Next holiday: ${next.name}, ${formatDate(next.date)}`);
@@ -144,6 +148,7 @@ function renderYear() {
 }
 function render() {
   if (!data) return;
+  renderHero();
   const all = yearHolidays();
   const selected = all.filter(matches);
   const monthSelected = selected.filter(h => Number(h.date.slice(5, 7)) - 1 === state.month);
@@ -271,6 +276,8 @@ document.addEventListener('click', event => {
     const found = yourLeavePlans().find(p => p.start === plan.dataset.plan);
     if (found) download(createBreakICS(found, data.fetchedAt), `break-${found.start}.ics`);
   }
+  const reminder = event.target.closest('[data-reminders]');
+  if (reminder) { withReminders = reminder.dataset.reminders === 'on'; $('#dialog-content').innerHTML = subscribeContent(); $(`[data-reminders="${reminder.dataset.reminders}"]`)?.focus(); }
   const copy = event.target.closest('[data-copy]');
   if (copy) copyLink(copy.dataset.copy);
   const month = event.target.closest('[data-month]');
@@ -299,10 +306,13 @@ function plannerContent() {
   const rows = plans.map(p => `<div class="weekend-row plan-row"><span>Take ${p.leaveDates.map(d => shortDate(d, { weekday: 'short' })).join(', ')} off<small>${shortDate(p.start, { weekday: 'short' })} – ${shortDate(p.end, { weekday: 'short' })}</small><button class="feed-link" data-plan="${p.start}">↓ Add break to my calendar</button></span><strong>${p.days}<small>days off for ${p.leave} leave day${p.leave === 1 ? '' : 's'}</small></strong></div>`).join('');
   return `<span class="dialog-symbol" aria-hidden="true">✦</span><h2 id="dialog-title" class="dialog-heading">More days off, less leave.</h2><p class="dialog-body">Leave days that join ${state.year} holidays to your weekend. The best value for each break is shown.${isEstimated(state.year) ? ' Holiday dates for this year are estimates.' : ''}</p>${prefsControls()}${rows || `<p class="dialog-body">No leave ideas ${state.year === thisYear ? 'left ' : ''}for ${state.year}.</p>`}<p class="dialog-body">Your leave rules may differ. Verify dates before booking.</p>`;
 }
+let withReminders = true;
 function subscribeContent() {
+  const suffix = withReminders ? '-reminders.ics' : '.ics';
   const feeds = [['holidays.ics', 'All public holidays', 'Poya, public and bank holidays. Best for government and bank workers.'], ['holidays-mercantile.ics', 'Mercantile holidays', 'Only the days most private-sector offices close.']];
-  return `<span class="dialog-symbol" aria-hidden="true">↻</span><h2 id="dialog-title" class="dialog-heading">Always up to date.</h2><p class="dialog-body">Subscribe once and your calendar app checks for changes automatically, including newly announced and corrected dates.</p>${feeds.map(([file, title, text]) => {
-    const https = `${location.origin}/${file}`, webcal = `webcal://${location.host}/${file}`;
+  return `<span class="dialog-symbol" aria-hidden="true">↻</span><h2 id="dialog-title" class="dialog-heading">Always up to date.</h2><p class="dialog-body">Subscribe once and your calendar app checks for changes automatically, including newly announced and corrected dates.</p><div class="filters reminder-switch" role="group" aria-label="Reminders"><button class="filter${withReminders ? ' active' : ''}" data-reminders="on" aria-pressed="${withReminders}">🔔 Remind me a day and a week before</button><button class="filter${withReminders ? '' : ' active'}" data-reminders="off" aria-pressed="${!withReminders}">No reminders</button></div><p class="dialog-body planner-hint">Reminders work in Apple Calendar and Outlook. Google Calendar uses its own notification settings for subscribed calendars.</p>${feeds.map(([file, title, text]) => {
+    const path = file.replace('.ics', suffix);
+    const https = `${location.origin}/${path}`, webcal = `webcal://${location.host}/${path}`;
     return `<section class="feed"><h3>${title}</h3><p>${text}</p><div class="feed-actions"><a class="dialog-action" href="${esc(webcal)}">Apple · Outlook</a><a class="feed-link" href="https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcal)}" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a><button class="feed-link" data-copy="${esc(https)}">Copy link</button></div></section>`;
   }).join('')}<p class="dialog-body">Elsewhere, paste the link into your calendar’s “Subscribe” or “From URL” option. Updates can take a day to appear.</p>`;
 }

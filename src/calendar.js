@@ -77,7 +77,10 @@ function foldLine(line) {
   }
   return result + current;
 }
-export function createICS(holidays, fetchedAt, estimatedYears = {}, { name = 'Sri Lanka Public Holidays', description = '', feed = false } = {}) {
+// Alerts at 9 am the day before and 9 am a week before (all-day events start at midnight).
+export const REMINDERS = [['-PT15H', 'Tomorrow'], ['-P6DT15H', 'In a week']];
+const reminderLines = h => REMINDERS.flatMap(([trigger, when]) => ['BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${escapeICS(`${when}: ${h.name}`)}`, `TRIGGER:${trigger}`, 'END:VALARM']);
+export function createICS(holidays, fetchedAt, estimatedYears = {}, { name = 'Sri Lanka Public Holidays', description = '', feed = false, reminders = false } = {}) {
   const stamp = new Date(fetchedAt).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Island Days//Sri Lanka Holidays//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', `X-WR-CALNAME:${escapeICS(name)}`];
   if (description) lines.push(`X-WR-CALDESC:${escapeICS(description)}`);
@@ -86,7 +89,7 @@ export function createICS(holidays, fetchedAt, estimatedYears = {}, { name = 'Sr
     const estimated = estimatedYears[h.date.slice(0, 4)]?.estimated;
     const kind = holidayClass(h);
     const categories = [h.type === 'poya' ? 'Poya day' : 'Public holiday', ...(kind.bank ? ['Bank holiday'] : []), ...(kind.mercantile ? ['Mercantile holiday'] : [])];
-    lines.push('BEGIN:VEVENT', `UID:${h.id}@island-days.local`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${h.date.replace(/-/g, '')}`, `DTEND;VALUE=DATE:${addDays(h.date, 1).replace(/-/g, '')}`, `SUMMARY:${escapeICS(h.name)}${estimated ? ' (estimated)' : ''}`, `CATEGORIES:${categories.map(escapeICS).join(',')}`, `DESCRIPTION:${escapeICS(`${categories.join(' · ')}\nSource: ${h.sourceUrl}\n${estimated ? 'Estimated date. ' : ''}Dates may change. Verify before making plans.`)}`, `URL:${h.sourceUrl}`, 'TRANSP:TRANSPARENT', 'END:VEVENT');
+    lines.push('BEGIN:VEVENT', `UID:${h.id}@island-days.local`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${h.date.replace(/-/g, '')}`, `DTEND;VALUE=DATE:${addDays(h.date, 1).replace(/-/g, '')}`, `SUMMARY:${escapeICS(h.name)}${estimated ? ' (estimated)' : ''}`, `CATEGORIES:${categories.map(escapeICS).join(',')}`, `DESCRIPTION:${escapeICS(`${categories.join(' · ')}\nSource: ${h.sourceUrl}\n${estimated ? 'Estimated date. ' : ''}Dates may change. Verify before making plans.`)}`, `URL:${h.sourceUrl}`, 'TRANSP:TRANSPARENT', ...(reminders ? reminderLines(h) : []), 'END:VEVENT');
   }
   lines.push('END:VCALENDAR');
   return lines.map(foldLine).join('\r\n') + '\r\n';

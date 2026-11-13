@@ -242,3 +242,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .cal-day.lw-start::before,.cal-day.lp-start::after{left:calc(50% - var(--dot) / 2 - 4px)}
 .cal-day.lw-end::before,.cal-day.lp-end::after{right:calc(50% - var(--dot) / 2 - 4px)}
 @media(max-width:600px){.cal{--cal-gap:2px}}
+.reminder-switch{margin:4px 0 2px}
+.next-break{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:18px 0 0;padding-top:14px;border-top:1px solid #ffffff1f;font-size:var(--fs-sm);color:#d4ddca}
+.next-break span{font-size:var(--fs-xs);letter-spacing:.8px;text-transform:uppercase;color:#c7d0bc}.next-break strong{font-size:var(--fs-base);font-weight:600;color:#f7f6e9}.next-break em{font-style:normal;color:#e5c675}
