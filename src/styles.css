@@ -3279,6 +3279,7 @@ select:focus-visible {
   --poya-fill: #f3df9e;
   --poya-ink: #674b13;
   --today-ring: #315b40;
+  --leave-ring: #bd5148;
   --leave: #57794e;
   --break: #e7efde;
   --muted-ink: #626f5e;
@@ -3294,6 +3295,7 @@ select:focus-visible {
   --poya-fill: #655222;
   --poya-ink: #ffe8aa;
   --today-ring: #bbd2a7;
+  --leave-ring: #ef8f85;
   --leave: #9cb98a;
   --break: #28382a;
   --muted-ink: #abb9a3;
@@ -3337,7 +3339,9 @@ select:focus-visible {
 .cal .cal-dot.is-today.is-poya,
 .year-grid .mini-dot.is-today.is-poya { background: var(--poya-fill); color: var(--poya-ink); }
 .cal .cal-dot.is-leave:not(.is-today),
-.year-grid .mini-dot.is-leave:not(.is-today) { background: var(--calendar-surface); color: var(--holiday-ink); box-shadow: inset 0 0 0 1.5px var(--leave); }
+.year-grid .mini-dot.is-leave:not(.is-today) { background: var(--calendar-surface); color: var(--holiday-ink); box-shadow: inset 0 0 0 2px var(--leave-ring); }
+.cal .cal-dot.is-today.is-leave,
+.year-grid .mini-dot.is-today.is-leave { box-shadow: inset 0 0 0 2px var(--leave-ring); }
 .cal .cal-day.lw::before,
 .year-grid .mini-dates > span.lw::before { background: var(--break); }
 .cal .cal-day.lp::after,
@@ -3361,7 +3365,7 @@ select:focus-visible {
 .legend-group .weekend-dot { background: var(--weekend); border: 1px solid var(--control-border); }
 .legend-group .today-dot { background: transparent; border: 2px solid var(--today-ring); }
 .legend-group .lw-dot { width: 16px; border-radius: 3px; background: var(--break); border: 1px solid var(--control-border); }
-.legend-group .leave-dot { background: transparent; border: 1.5px dashed var(--leave); }
+.legend-group .leave-dot { background: transparent; border: 1.5px solid var(--leave-ring); }
 .panel-subtitle,
 .upcoming-meta,
 .date-tile small,
