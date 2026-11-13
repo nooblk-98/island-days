@@ -59,3 +59,5 @@
 [data-theme="dark"] .skip-link{background:#18211b}[data-theme="dark"] .mini-month:hover{border-color:#4d6044}[data-theme="dark"] .holiday-chip:hover{box-shadow:none}
 footer{flex-wrap:wrap}.footer-credit{width:100%;display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;padding-top:12px;border-top:1px dashed var(--line);font-size:11px}.footer-credit a{color:#5c6e51;font-weight:600}.star-link{display:inline-flex;align-items:center;gap:5px;text-decoration:none;border:1px solid #d9ddcf;border-radius:30px;padding:4px 11px 4px 9px;background:#fffefa}.star-link:hover{border-color:#b7953f}.star-link svg{width:13px;height:13px;fill:#e2c06c;stroke:#b7953f;stroke-width:1.2}
 [data-theme="dark"] .footer-credit a{color:#b7c8a9}[data-theme="dark"] .star-link{background:#18211b;border-color:#33402f}
+.upcoming-item>span:nth-child(2){flex:1;min-width:0}.holiday-list .upcoming-arrow{margin-left:0}.list-type{margin-left:0;flex:none;width:96px;text-align:center}
+@media(max-width:600px){.list-type{width:auto}}
