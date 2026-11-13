@@ -54,13 +54,18 @@ function renderHero() {
   $('#next-holiday').setAttribute('aria-label', `Next holiday: ${next.name}, ${formatDate(next.date)}`);
 }
 // Days that belong to a long weekend, so the calendars can draw one band across each break.
-function breakDays() {
-  const source = state.filter === 'mercantile' ? data.holidays.filter(isMercantile) : data.holidays;
+// Leave breaks (dashed) need one to three leave days; long weekends (solid) need none.
+function spanDays(spans) {
   const days = new Map();
-  for (const w of longWeekends(source, state.year)) for (let d = w.start; d <= w.end; d = addDays(d, 1)) days.set(d, { ...w, first: d === w.start, last: d === w.end });
+  for (const s of spans) for (let d = s.start; d <= s.end; d = addDays(d, 1)) days.set(d, { ...s, first: d === s.start, last: d === s.end, isLeave: s.leaveDates?.includes(d) });
   return days;
 }
-const breakClass = (info, column) => info ? ` lw${info.first || column === 0 ? ' lw-start' : ''}${info.last || column === 6 ? ' lw-end' : ''}` : '';
+function breakDays() {
+  const source = state.filter === 'mercantile' ? data.holidays.filter(isMercantile) : data.holidays;
+  return { weekends: spanDays(longWeekends(source, state.year)), leave: spanDays(leavePlans(source, state.year)) };
+}
+const spanClass = (info, column, prefix) => info ? ` ${prefix}${info.first || column === 0 ? ` ${prefix}-start` : ''}${info.last || column === 6 ? ` ${prefix}-end` : ''}` : '';
+const breakClass = (breaks, date, column) => spanClass(breaks.weekends.get(date), column, 'lw') + spanClass(breaks.leave.get(date), column, 'lp');
 function renderMonth() {
   const breaks = breakDays();
   const cells = monthCells(state.year, state.month);
@@ -76,11 +81,13 @@ function renderMonth() {
     if (!cell.inMonth) return '<div class="cal-day is-empty" aria-hidden="true"></div>';
     const events = byDate.get(cell.date) || [];
     const isToday = cell.date === today;
-    const info = breaks.get(cell.date);
-    const day = `cal-day${breakClass(info, index % 7)}`;
-    const cls = ['cal-dot', cell.weekend && 'is-weekend', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', isToday && 'is-today'].filter(Boolean).join(' ');
+    const info = breaks.weekends.get(cell.date);
+    const plan = breaks.leave.get(cell.date);
+    const day = `cal-day${breakClass(breaks, cell.date, index % 7)}`;
+    const cls = ['cal-dot', cell.weekend && 'is-weekend', plan?.isLeave && 'is-leave', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', isToday && 'is-today'].filter(Boolean).join(' ');
     const current = isToday ? ' aria-current="date"' : '';
     const breakNote = info ? `, part of a ${info.days}-day long weekend` : '';
+    if (plan?.isLeave) return `<div class="${day}"><span class="${cls}"${current} title="${`Take leave: ${plan.days} days off for ${plan.leave} leave day${plan.leave === 1 ? '' : 's'}`}">${cell.day}</span><span class="cal-name leave-name">Take leave</span></div>`;
     if (!events.length) return `<div class="${day}"><span class="${cls}"${current}${info ? ` title="${info.days}-day long weekend"` : ''}>${cell.day}</span></div>`;
     const names = events.map(h => h.name);
     return `<div class="${day}"><button class="${cls}" data-date="${cell.date}"${current} aria-label="${esc(`${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${names.join(', ')}${breakNote}`)}">${cell.day}</button><span class="cal-name" aria-hidden="true">${esc(names.join(' · '))}</span></div>`;
@@ -92,9 +99,9 @@ function renderYear() {
   const breaks = breakDays();
   $('#calendar').innerHTML = `<div class="year-grid">${MONTHS.map((name, month) => `<button class="mini-month" data-month="${month}" aria-label="Open ${name} ${state.year}"><h3>${name}</h3><div class="mini-week">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<span>${d}</span>`).join('')}</div><div class="mini-dates">${monthCells(state.year, month).map((cell, index) => {
     if (!cell.inMonth) return '<span></span>';
-    const band = breakClass(breaks.get(cell.date), index % 7).trim();
+    const band = breakClass(breaks, cell.date, index % 7).trim();
     const events = holidays.filter(h => h.date === cell.date);
-    const cls = ['mini-dot', cell.weekend && 'is-weekend', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', cell.date === today && 'is-today'].filter(Boolean).join(' ');
+    const cls = ['mini-dot', cell.weekend && 'is-weekend', breaks.leave.get(cell.date)?.isLeave && 'is-leave', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', cell.date === today && 'is-today'].filter(Boolean).join(' ');
     return `<span${band ? ` class="${band}"` : ''}><i class="${cls}">${cell.day}</i></span>`;
   }).join('')}</div></button>`).join('')}</div>`;
 }
