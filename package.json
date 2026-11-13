@@ -1,0 +1,22 @@
+{
+  "name": "island-days",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "refresh": "node scripts/refresh.mjs",
+    "test": "node --test",
+    "deploy": "wrangler pages deploy dist --project-name island-days"
+  },
+  "dependencies": {
+    "cheerio": "1.1.2"
+  },
+  "devDependencies": {
+    "wrangler": "4.161.0"
+  }
+}

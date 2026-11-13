@@ -1,0 +1,55 @@
+export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+export const parseDate = value => new Date(`${value}T00:00:00Z`);
+export const isoDate = date => date.toISOString().slice(0, 10);
+export const addDays = (value, days) => { const date = parseDate(value); date.setUTCDate(date.getUTCDate() + days); return isoDate(date); };
+export function colomboToday(now = new Date()) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Colombo', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now).map(p => [p.type, p.value]));
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
+export const formatDate = (value, options = { day: 'numeric', month: 'long', year: 'numeric' }) => parseDate(value).toLocaleDateString('en-GB', { ...options, timeZone: 'UTC' });
+export const daysBetween = (from, to) => Math.round((parseDate(to) - parseDate(from)) / 86400000);
+export function monthCells(year, month) {
+  const first = new Date(Date.UTC(year, month, 1));
+  const offset = (first.getUTCDay() + 6) % 7;
+  const count = Math.ceil((offset + new Date(Date.UTC(year, month + 1, 0)).getUTCDate()) / 7) * 7;
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date(Date.UTC(year, month, index - offset + 1));
+    return { date: isoDate(date), day: date.getUTCDate(), inMonth: date.getUTCMonth() === month, weekend: [0, 6].includes(date.getUTCDay()) };
+  });
+}
+export function longWeekends(holidays, year) {
+  const days = new Set(holidays.filter(h => h.date.startsWith(`${year}-`)).map(h => h.date));
+  const off = value => days.has(value) || [0, 6].includes(parseDate(value).getUTCDay());
+  const results = [];
+  let start = `${year}-01-01`;
+  const end = `${year}-12-31`;
+  while (start <= end) {
+    if (!off(start)) { start = addDays(start, 1); continue; }
+    const from = start;
+    while (off(start)) start = addDays(start, 1);
+    const length = daysBetween(from, start);
+    if (length >= 3) results.push({ start: from, end: addDays(start, -1), days: length });
+  }
+  return results;
+}
+const escapeICS = value => value.replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/;/g, '\\;').replace(/,/g, '\\,');
+function foldLine(line) {
+  const encoder = new TextEncoder();
+  let result = '', current = '', bytes = 0;
+  for (const char of line) {
+    const length = encoder.encode(char).length;
+    if (bytes + length > 75) { result += `${current}\r\n`; current = ' '; bytes = 1; }
+    current += char; bytes += length;
+  }
+  return result + current;
+}
+export function createICS(holidays, fetchedAt, estimatedYears = {}) {
+  const stamp = new Date(fetchedAt).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Island Days//Sri Lanka Holidays//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Sri Lanka Public Holidays'];
+  for (const h of holidays) {
+    const estimated = estimatedYears[h.date.slice(0, 4)]?.estimated;
+    lines.push('BEGIN:VEVENT', `UID:${h.id}@island-days.local`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${h.date.replace(/-/g, '')}`, `DTEND;VALUE=DATE:${addDays(h.date, 1).replace(/-/g, '')}`, `SUMMARY:${escapeICS(h.name)}${estimated ? ' (estimated)' : ''}`, `DESCRIPTION:${escapeICS(`Source: ${h.sourceUrl}\n${estimated ? 'Estimated date. ' : ''}Dates may change. Verify before making plans.`)}`, `URL:${h.sourceUrl}`, 'TRANSP:TRANSPARENT', 'END:VEVENT');
+  }
+  lines.push('END:VCALENDAR');
+  return lines.map(foldLine).join('\r\n') + '\r\n';
+}
