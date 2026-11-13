@@ -48,7 +48,7 @@ Dates use **Asia/Colombo**, independently of the visitor’s browser timezone. P
 
 **HTML · CSS · Vanilla JavaScript · Node.js · Cheerio · GitHub Actions · Cloudflare Pages**
 
-A static website with no frontend framework, database, visitor accounts, analytics, or external fonts.
+A static website with no frontend framework, database, visitor accounts, cookies, or external fonts. Visits are counted with cookie-free [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/), which does not track individuals.
 
 > [!NOTE]
 > The government can declare or move holidays after the gazette, and the calendar picks up changes when the Central Bank updates its list. Verify dates and working arrangements before booking. Downloads are one-time imports; use a subscription to receive changes.

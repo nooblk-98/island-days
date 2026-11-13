@@ -113,7 +113,7 @@ Use your own exact project name if different. `npm run build` intentionally uses
 
 Calendar downloads are one-time `.ics` imports; subscribe to `/holidays.ics` for live updates. Long weekends follow each visitor's "My days off" settings (Saturday–Sunday by default) and require no extra leave. The total counts distinct holiday dates, so two holidays on the same day count once.
 
-This is an independent project with attribution and source links. Check the source's terms for your intended use, and verify dates before making bookings. No analytics, external fonts, or visitor tracking are included.
+This is an independent project with attribution and source links. Check the source's terms for your intended use, and verify dates before making bookings. The live site uses cookie-free Cloudflare Web Analytics (enabled in the Pages project settings); no external fonts or visitor tracking are included.
 
 ## Official references
 
