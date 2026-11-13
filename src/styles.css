@@ -224,3 +224,21 @@ button,a,select,input{-webkit-font-smoothing:antialiased}
   .holiday-table td{font-size:13px}.holiday-table td:first-child{white-space:normal}
 }
 .weekend-row strong small{font-family:var(--font-sans);font-size:var(--fs-xs);color:var(--muted-ink)}
+/* Year switch: same segmented style as the view switch */
+.year-switch{display:inline-flex;align-items:center;height:var(--control-h);padding:3px;gap:2px;border:1px solid var(--control-border);border-radius:var(--r-pill);background:var(--control-bg)}
+.year-switch button{height:28px;padding:0 13px;border-radius:var(--r-pill);background:transparent;color:var(--muted-ink);font-size:var(--fs-sm);font-weight:550;font-variant-numeric:tabular-nums}
+.year-switch button:hover{background:var(--control-hover);filter:none}
+.year-switch button.selected{background:#e5ebdb;color:var(--primary);font-weight:650}
+[data-theme="dark"] .year-switch button.selected{background:#26352b;color:#d6e6c8}
+/* Focus: a soft ring that follows each control's shape, instead of a thick offset outline */
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #b7953f;outline-offset:2px}
+.view-toggle button:focus-visible,.year-switch button:focus-visible,.filter:focus-visible,.cal-dot:focus-visible{outline-offset:1px}
+.search:focus-within{outline:none;border-color:#9eae8c;box-shadow:0 0 0 3px rgba(40,79,60,.12)}
+/* Touch screens keep the last tapped button "hovered": only change colour there, never layout */
+@media(hover:none){.filter:hover,.icon-button:hover,.year-switch button:hover{background-color:transparent}.today-button:hover,.prefs-button:hover{background-color:var(--control-bg);border-color:var(--control-border)}.filter.active:hover,.year-switch button.selected:hover{background:#e5ebdb}[data-theme="dark"] .filter.active:hover,[data-theme="dark"] .year-switch button.selected:hover{background:#26352b}}
+/* Band pieces meet exactly in the column gap (no doubled stripe) */
+.cal{--cal-gap:6px}.cal-weekdays,.cal-grid{column-gap:var(--cal-gap)}
+.cal-day.lw::before,.cal-day.lp::after{left:calc(var(--cal-gap) / -2);right:calc(var(--cal-gap) / -2)}
+.cal-day.lw-start::before,.cal-day.lp-start::after{left:calc(50% - var(--dot) / 2 - 4px)}
+.cal-day.lw-end::before,.cal-day.lp-end::after{right:calc(50% - var(--dot) / 2 - 4px)}
+@media(max-width:600px){.cal{--cal-gap:2px}}

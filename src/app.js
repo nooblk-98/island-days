@@ -148,7 +148,7 @@ function render() {
   const selected = all.filter(matches);
   const monthSelected = selected.filter(h => Number(h.date.slice(5, 7)) - 1 === state.month);
   $('#month-title').textContent = state.view === 'year' ? `${state.year} at a glance` : state.view === 'list' ? `${state.year} holidays` : `${MONTHS[state.month]} ${state.year}`;
-  $('#year').value = state.year;
+  document.querySelectorAll('[data-year]').forEach(b => { const on = Number(b.dataset.year) === state.year; b.classList.toggle('selected', on); b.setAttribute('aria-pressed', on); });
   const amount = state.view === 'month' ? monthSelected.length : selected.length;
   $('#month-count').textContent = `${amount} holiday${amount === 1 ? '' : 's'}`;
   $('#estimate-note').hidden = !isEstimated(state.year);
@@ -242,7 +242,7 @@ $('#today').onclick = () => {
   state.month = Number(today.slice(5, 7)) - 1; state.view = 'month'; state.filter = 'all'; resetSearch(); render();
   if (state.year !== thisYear) notify(`Dates for ${thisYear} are not available yet. Showing ${state.year}.`);
 };
-$('#year').onchange = event => { state.year = Number(event.target.value); render(); };
+$('#year').onclick = event => { const b = event.target.closest('[data-year]'); if (b) { state.year = Number(b.dataset.year); render(); } };
 $('#month-view').onclick = () => { state.view = 'month'; resetSearch(); render(); };
 $('#list-view').onclick = () => { state.view = 'list'; render(); };
 $('#nav-calendar').onclick = () => { state.view = 'month'; resetSearch(); render(); };
@@ -333,7 +333,7 @@ async function init() {
     availableYears = Object.keys(data.years).map(Number).sort();
     if (!availableYears.includes(state.year)) state.year = availableYears.reduce((best, year) => Math.abs(year - thisYear) < Math.abs(best - thisYear) ? year : best);
     const linkedHoliday = location.search ? readURL() : null;
-    $('#year').innerHTML = availableYears.map(year => `<option value="${year}">${year}</option>`).join('');
+    $('#year').innerHTML = availableYears.map(year => `<button type="button" data-year="${year}" aria-pressed="false">${year}</button>`).join('');
     const stale = Date.now() - Date.parse(data.fetchedAt) > 45 * 86400000;
     $('.data-line').classList.toggle('stale', stale);
     const checked = colomboToday(new Date(data.fetchedAt));
