@@ -97,3 +97,23 @@ footer.site-footer{display:block;max-width:none;margin:56px 0 0;padding:0;border
 .other-years{margin-top:22px}.small-note{font-size:12px!important;color:#8a947e!important;margin-top:28px}
 @media(max-width:600px){.year-main h1{font-size:34px}.holiday-table td,.holiday-table th{padding:10px 12px}.holiday-table td:nth-child(2){display:none}.holiday-table th:nth-child(2){display:none}.year-page-cta{font-size:11px;padding:6px 10px}}
 [data-theme="dark"] .year-main p,[data-theme="dark"] .year-main li{color:#b2bcaa}[data-theme="dark"] .table-wrap{background:#18211b}[data-theme="dark"] .tag{background:#223026;color:#c9d8bd}[data-theme="dark"] .tag.mercantile{background:#1d3438;color:var(--mercantile)}[data-theme="dark"] .year-main a,[data-theme="dark"] .footer-years a,[data-theme="dark"] .crumbs a,[data-theme="dark"] .year-page-cta{color:#b7c8a9}[data-theme="dark"] .year-page-cta,[data-theme="dark"] .dialog-action.ghost{border-color:#33402f}
+/* Leave days: a badge on the day itself, visible on every screen size */
+.cal-dot.is-leave{overflow:visible}button.cal-dot.is-leave{cursor:pointer}
+.leave-badge{position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);z-index:2;background:var(--leave);color:#fff;font-size:8.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;line-height:1;padding:3px 6px 3px;border-radius:20px;box-shadow:0 0 0 2px #fffefa;white-space:nowrap}
+.cal-day:has(.leave-badge){padding-bottom:8px}
+/* Breaks this month */
+.month-breaks{margin-top:22px;padding-top:18px;border-top:1px dashed var(--line)}.month-breaks h3{margin:0 0 10px;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:#8a947e;font-weight:600}
+.break-item{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:transparent;border-radius:12px;padding:10px 12px;margin:0 -12px;color:inherit}
+button.break-item:hover{background:#f6efe6}.break-item.is-past{opacity:.5}
+.break-days{flex:none;width:58px;height:50px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;letter-spacing:.4px;text-transform:uppercase}.break-days b{font-family:Georgia,serif;font-weight:400;font-size:22px;line-height:1;letter-spacing:0}
+.is-leave-plan .break-days{background:#fff4ea;color:#9a4f1b;box-shadow:inset 0 0 0 1.5px var(--leave)}.is-free .break-days{background:var(--break);color:#7a5b2c}
+.break-text{display:grid;gap:3px;min-width:0}.break-text strong{font-size:14px;color:var(--ink)}.is-leave-plan .break-text strong{color:#9a4f1b}.break-text small{font-size:12px;color:#7b8770}
+.break-go{margin-left:auto;font-size:20px;color:#b0622a}.break-empty{margin:0;font-size:12px;color:#8a947e}
+/* Break details dialog */
+.break-days-list{list-style:none;padding:0;margin:16px 0 18px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.break-days-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px}.break-days-list li:last-child{border-bottom:0}
+.break-days-list li.is-leave-day{background:#fff4ea}.day-date{font-weight:600;white-space:nowrap}
+.day-kind{font-size:11px;padding:3px 9px;border-radius:20px;text-align:right}.day-kind.leave{background:var(--leave);color:#fff;font-weight:700}.day-kind.holiday{background:var(--public-bg);color:var(--public)}.day-kind.weekend{background:var(--weekend);color:var(--weekend-ink)}
+@media(max-width:600px){.leave-badge{font-size:7.5px;padding:2px 5px;bottom:-8px}.break-item{gap:10px}.break-days{width:50px;height:46px}.break-text strong{font-size:13px}}
+[data-theme="dark"] .leave-badge{box-shadow:0 0 0 2px #18211b}[data-theme="dark"] .is-leave-plan .break-days,[data-theme="dark"] .break-days-list li.is-leave-day{background:#3a2a1d;color:#f4be92}[data-theme="dark"] .is-leave-plan .break-text strong{color:#f4be92}[data-theme="dark"] button.break-item:hover{background:#231c15}[data-theme="dark"] .is-free .break-days{color:#e8c99b}[data-theme="dark"] .break-text small{color:#9aa592}
+.legend{flex-wrap:wrap;row-gap:8px}.legend>span{white-space:nowrap}

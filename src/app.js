@@ -78,6 +78,31 @@ function breakDays() {
 const isOff = date => isWeekend(date, weekendDays());
 const spanClass = (info, column, prefix) => info ? ` ${prefix}${info.first || column === 0 ? ` ${prefix}-start` : ''}${info.last || column === 6 ? ` ${prefix}-end` : ''}` : '';
 const breakClass = (breaks, date, column) => spanClass(breaks.weekends.get(date), column, 'lw') + spanClass(breaks.leave.get(date), column, 'lp');
+// Plain-language list of this month's breaks, so nobody has to decode the bands.
+function monthBreaks() {
+  const prefix = `${state.year}-${String(state.month + 1).padStart(2, '0')}`;
+  const inMonth = s => s.start.slice(0, 7) <= prefix && s.end.slice(0, 7) >= prefix;
+  const range = s => `${shortDate(s.start, { weekday: 'short' })} – ${shortDate(s.end, { weekday: 'short' })}`;
+  const leave = yourLeavePlans().filter(inMonth).map(p => ({ start: p.start, past: p.end < today, html: `<button class="break-item is-leave-plan" data-break="${p.start}"><span class="break-days"><b>${p.days}</b>days off</span><span class="break-text"><strong>Take ${p.leaveDates.map(d => shortDate(d, { weekday: 'short' })).join(' and ')} off</strong><small>${range(p)} · ${p.leave} leave day${p.leave === 1 ? '' : 's'}</small></span><span class="break-go" aria-hidden="true">›</span></button>` }));
+  const free = yourLongWeekends().filter(inMonth).map(w => ({ start: w.start, past: w.end < today, html: `<div class="break-item is-free"><span class="break-days"><b>${w.days}</b>days off</span><span class="break-text"><strong>No leave needed</strong><small>${range(w)} · long weekend</small></span></div>` }));
+  const items = [...leave, ...free].sort((a, b) => a.start.localeCompare(b.start));
+  const body = items.length ? items.map(i => i.past ? i.html.replace('class="break-item', 'class="break-item is-past') : i.html).join('') : '<p class="break-empty">No long weekends or leave ideas this month.</p>';
+  return `<section class="month-breaks" aria-label="Breaks this month"><h3>Breaks this month</h3>${body}</section>`;
+}
+// One break explained day by day, with the leave days called out.
+function breakContent(start) {
+  const p = yourLeavePlans().find(plan => plan.start === start);
+  if (!p) return '';
+  const rows = [];
+  for (let d = p.start; d <= p.end; d = addDays(d, 1)) {
+    const names = data.holidays.filter(h => h.date === d).map(h => esc(h.name));
+    const isLeave = p.leaveDates.includes(d);
+    const label = isLeave ? '<span class="day-kind leave">Take leave</span>' : names.length ? `<span class="day-kind holiday">${names.join(' · ')}</span>` : '<span class="day-kind weekend">Weekend</span>';
+    rows.push(`<li class="${isLeave ? 'is-leave-day' : ''}"><span class="day-date">${formatDate(d, { weekday: 'short', day: 'numeric', month: 'short' })}</span>${label}</li>`);
+  }
+  return `<span class="dialog-symbol" aria-hidden="true">✦</span><h2 id="dialog-title" class="dialog-heading">${p.days} days off for ${p.leave} leave day${p.leave === 1 ? '' : 's'}.</h2><p class="dialog-body">Apply for leave on <strong>${p.leaveDates.map(d => formatDate(d, { weekday: 'long', day: 'numeric', month: 'long' })).join(' and ')}</strong>. Together with the holiday and your weekend, that gives you ${range(p)} off in a row.</p><ol class="break-days-list">${rows.join('')}</ol><button class="dialog-action" data-plan="${p.start}">↓ Add this break to my calendar</button><p class="dialog-body planner-hint">Your leave rules may differ. Verify dates before booking.</p>`;
+  function range(x) { return `${shortDate(x.start, { weekday: 'short' })} – ${shortDate(x.end, { weekday: 'short' })}`; }
+}
 function renderMonth() {
   const breaks = breakDays();
   const cells = monthCells(state.year, state.month);
@@ -99,12 +124,12 @@ function renderMonth() {
     const cls = ['cal-dot', isOff(cell.date) && 'is-weekend', plan?.isLeave && 'is-leave', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', isToday && 'is-today'].filter(Boolean).join(' ');
     const current = isToday ? ' aria-current="date"' : '';
     const breakNote = info ? `, part of a ${info.days}-day long weekend` : '';
-    if (plan?.isLeave) return `<div class="${day}"><span class="${cls}"${current} title="${`Take leave: ${plan.days} days off for ${plan.leave} leave day${plan.leave === 1 ? '' : 's'}`}">${cell.day}</span><span class="cal-name leave-name">Take leave</span></div>`;
+    if (plan?.isLeave) return `<div class="${day}"><button class="${cls}" data-break="${plan.start}"${current} aria-label="${esc(`Take leave on ${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${plan.days} days off for ${plan.leave} leave day${plan.leave === 1 ? '' : 's'}`)}">${cell.day}<span class="leave-badge" aria-hidden="true">Leave</span></button></div>`;
     if (!events.length) return `<div class="${day}"><span class="${cls}"${current}${info ? ` title="${info.days}-day long weekend"` : ''}>${cell.day}</span></div>`;
     const names = events.map(h => h.name);
     return `<div class="${day}"><button class="${cls}" data-date="${cell.date}"${current} aria-label="${esc(`${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${names.join(', ')}${breakNote}`)}">${cell.day}</button><span class="cal-name" aria-hidden="true">${esc(names.join(' · '))}</span></div>`;
   }).join('');
-  $('#calendar').innerHTML = `<div class="cal${prefs.saturday ? ' works-saturday' : ''}"><div class="cal-weekdays">${weekdays}</div><div class="cal-grid">${days}</div></div>`;
+  $('#calendar').innerHTML = `<div class="cal${prefs.saturday ? ' works-saturday' : ''}"><div class="cal-weekdays">${weekdays}</div><div class="cal-grid">${days}</div>${monthBreaks()}</div>`;
 }
 function renderYear() {
   const holidays = yearHolidays().filter(matches);
@@ -239,6 +264,8 @@ document.addEventListener('click', event => {
     $('#dialog-content').innerHTML = planner ? plannerContent() : settingsContent();
     $(`[data-pref="${pref.dataset.pref}"]`)?.focus();
   }
+  const breakButton = event.target.closest('[data-break]');
+  if (breakButton) { const content = breakContent(breakButton.dataset.break); if (content) openDialog(content, 'break'); }
   const plan = event.target.closest('[data-plan]');
   if (plan) {
     const found = yourLeavePlans().find(p => p.start === plan.dataset.plan);
