@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { colomboToday, monthCells, createICS, longWeekends, holidayClass, leavePlans } from '../src/calendar.js';
-import { parseSource, mergeDatasets, validateDataset } from '../scripts/holidays.mjs';
+import { parseSource, mergeDatasets, validateDataset, parseCBSL, applyCBSL, carryFlags } from '../scripts/holidays.mjs';
 const data = JSON.parse(await readFile(new URL('../public/data/holidays.json', import.meta.url)));
 function fixture(year = 2026) {
   const rows = Array.from({ length: 20 }, (_, index) => {
@@ -95,4 +95,32 @@ test('subscription feeds refresh daily and tag holiday types', () => {
   const ics = createICS(data.holidays.filter(h => h.date === '2026-12-25'), data.fetchedAt, data.years, { name: 'Feed', feed: true });
   assert.match(ics, /REFRESH-INTERVAL;VALUE=DURATION:P1D/);
   assert.match(ics, /CATEGORIES:Public holiday,Bank holiday,Mercantile holiday/);
+});
+function cbslFixture(rows) {
+  const filler = Array.from({ length: 20 }, (_, i) => `<tr><td>December ${String(i + 1).padStart(2, '0')}, ${new Date(Date.UTC(2026, 11, i + 1)).toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' })}</td><td>Filler ${i}    B. P.</td></tr>`).join('');
+  return `<table><tr><td><h3>Date</h3></td><td><h3>Description</h3></td></tr>${rows}<tr><td> </td><td> </td></tr>${filler}</table>`;
+}
+test('Central Bank list parses both date styles and B/P/M codes', () => {
+  const rows = parseCBSL(cbslFixture('<tr><td>May 01, Friday</td><td>May Day (International Workers’ Day)    B. P. M. </td></tr><tr><td>01 May, Friday</td><td>Vesak Full Moon Poya Day    B. P.</td></tr>'), 2026);
+  assert.deepEqual(rows.slice(0, 2).map(r => [r.date, r.bank, r.mercantile]), [['2026-05-01', true, true], ['2026-05-01', true, false]]);
+  assert.throws(() => parseCBSL(cbslFixture('<tr><td>May 01, Monday</td><td>May Day    B. P. M.</td></tr>'), 2026), /weekday mismatch/);
+  assert.throws(() => parseCBSL('<table></table>', 2026), /incomplete/);
+});
+test('Central Bank flags attach to the right holiday and disagreements are reported', () => {
+  const list = [
+    { date: '2026-05-01', name: 'Vesak Full Moon Poya Day', bank: true, mercantile: false },
+    { date: '2026-05-01', name: 'May Day', bank: true, mercantile: true },
+    { date: '2026-05-02', name: 'Day following Vesak Full Moon Poya Day', bank: true, mercantile: true },
+    { date: '2026-12-30', name: 'Special Bank Holiday', bank: true, mercantile: false }
+  ];
+  const { data: checked, warnings } = applyCBSL(data, { 2026: list });
+  const flags = date => checked.holidays.filter(h => h.date === date).map(h => `${h.name}:${h.mercantile}`).sort();
+  assert.deepEqual(flags('2026-05-01'), ['May Day:true', 'Vesak Full Moon Poya Day:false']);
+  assert.ok(warnings.some(w => w.includes('Special Bank Holiday')));
+  assert.ok(warnings.some(w => w.includes('2026-01-03') && w.includes('not on the Central Bank list')));
+  // A Poya never inherits flags from a non-Poya holiday on the same date.
+  const unflagged = { ...data, holidays: data.holidays.map(({ bank, mercantile, ...h }) => h) };
+  const shifted = applyCBSL(unflagged, { 2026: [{ date: '2026-05-01', name: 'Day following Vesak Full Moon Poya Day', bank: true, mercantile: true }] }).data;
+  assert.equal(shifted.holidays.find(h => h.name === 'Vesak Full Moon Poya Day' && h.date === '2026-05-01').mercantile, undefined);
+  assert.equal(carryFlags(checked, unflagged).holidays.find(h => h.name === 'May Day').mercantile, true);
 });
