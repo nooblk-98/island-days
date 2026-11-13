@@ -3515,25 +3515,6 @@ select:focus-visible {
   .break-wrap { font-size: 10px; margin-top: 7px; }
 }
 
-/* Breaks that continue onto the next row end neatly at the row's first/last circle,
-   exactly like a normal start or end cap, instead of running into the card edge. */
-.cal .cal-day.lp-wrap-in::after,
-.cal .cal-day.lw-wrap-in::before {
-  left: calc(50% - var(--dot) / 2 - 4px);
-  border-top-left-radius: var(--dot);
-  border-bottom-left-radius: var(--dot);
-}
-.cal .cal-day.lp-wrap-out::after,
-.cal .cal-day.lw-wrap-out::before {
-  right: calc(50% - var(--dot) / 2 - 4px);
-  border-top-right-radius: var(--dot);
-  border-bottom-right-radius: var(--dot);
-}
-.cal .cal-day.lp-wrap-in::after { border-left: 2.5px dashed var(--leave); }
-.cal .cal-day.lp-wrap-out::after { border-right: 2.5px dashed var(--leave); }
-.cal .cal-day.lw-wrap-in::before { border-left: 3px solid var(--leave); }
-.cal .cal-day.lw-wrap-out::before { border-right: 3px solid var(--leave); }
-
 /* Holiday names sit clear of the break band's outline (band reaches 4px below the circle). */
 .cal .cal-name { margin-top: 10px; }
 

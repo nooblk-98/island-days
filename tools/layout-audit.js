@@ -77,8 +77,11 @@ window.__audit = function audit(label) {
       if (!day.classList.contains(cls)) continue;
       const dot = day.querySelector('.cal-dot').getBoundingClientRect(), cell = day.getBoundingClientRect(), s = getComputedStyle(day, pseudo);
       const left = cell.left + parseFloat(s.left), right = cell.right - parseFloat(s.right), top = cell.top + parseFloat(s.top), h = parseFloat(s.height);
-      const startCap = day.classList.contains(`${cls}-start`) || day.classList.contains(`${cls}-wrap-in`);
-      const endCap = day.classList.contains(`${cls}-end`) || day.classList.contains(`${cls}-wrap-out`);
+      // Row wraps are left open on purpose so the break visibly continues onto the next row.
+      const startCap = day.classList.contains(`${cls}-start`) && !day.classList.contains(`${cls}-wrap-in`);
+      if (day.classList.contains(`${cls}-wrap-in`) && left > cell.left + 1) issues.push(`band not open at row start on day ${day.querySelector('.cal-dot').firstChild.textContent.trim()}`);
+      const endCap = day.classList.contains(`${cls}-end`) && !day.classList.contains(`${cls}-wrap-out`);
+      if (day.classList.contains(`${cls}-wrap-out`) && right < cell.right - 1) issues.push(`band not open at row end on day ${day.querySelector('.cal-dot').firstChild.textContent.trim()}`);
       if (startCap && Math.abs(dot.left - left - 4) > 1.5) issues.push(`band start not hugging day ${day.querySelector('.cal-dot').firstChild.textContent.trim()} (${Math.round(dot.left - left)}px)`);
       if (endCap && Math.abs(right - dot.right - 4) > 1.5) issues.push(`band end not hugging day ${day.querySelector('.cal-dot').firstChild.textContent.trim()} (${Math.round(right - dot.right)}px)`);
       if (Math.abs(top + h / 2 - (dot.top + dot.height / 2)) > 1.5) issues.push(`band off-centre on day ${day.querySelector('.cal-dot').firstChild.textContent.trim()}`);
