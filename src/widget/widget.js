@@ -1,6 +1,6 @@
 // Embeddable "next holiday" card. Options in the query string:
-//   theme=light|dark|auto (default auto)   holidays=mercantile (private-sector holidays only)
-import { colomboToday, daysBetween, formatDate, holidayClass, longWeekends } from '/calendar.js';
+//   theme=light|dark|auto (default auto)   holidays=mercantile (mercantile holidays and Poya days)
+import { colomboToday, daysBetween, formatDate, isMercantileDayOff, longWeekends } from '/calendar.js';
 const params = new URLSearchParams(location.search);
 const theme = ['light', 'dark'].includes(params.get('theme')) ? params.get('theme') : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 document.documentElement.dataset.theme = theme;
@@ -9,11 +9,11 @@ const $ = id => document.getElementById(id);
 const today = colomboToday();
 try {
   const data = await (await fetch('/data/holidays.json', { cache: 'no-cache' })).json();
-  const holidays = mercantileOnly ? data.holidays.filter(h => holidayClass(h).mercantile) : data.holidays;
+  const holidays = mercantileOnly ? data.holidays.filter(isMercantileDayOff) : data.holidays;
   const next = holidays.find(h => h.date >= today);
   if (!next) throw new Error('No upcoming holiday');
   const delta = daysBetween(today, next.date);
-  $('label').textContent = mercantileOnly ? 'Next mercantile holiday' : 'Next holiday in Sri Lanka';
+  $('label').textContent = mercantileOnly ? 'Next mercantile or Poya holiday' : 'Next holiday in Sri Lanka';
   $('day').textContent = Number(next.date.slice(-2));
   $('month').textContent = formatDate(next.date, { month: 'short', year: 'numeric' }).toUpperCase();
   $('weekday').textContent = formatDate(next.date, { weekday: 'long' });

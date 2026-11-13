@@ -402,6 +402,14 @@ main {
   margin-bottom: 19px;
   gap: 10px;
 }
+.holiday-scope {
+  display: grid;
+  gap: 6px;
+}
+.holiday-scope-note {
+  color: var(--muted-ink);
+  font-size: 11px;
+}
 .filters {
   display: flex;
   flex-wrap: wrap;

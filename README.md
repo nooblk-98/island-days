@@ -24,11 +24,11 @@ The project is maintained by [nooblk-98](https://github.com/nooblk-98), with hol
 ## Features
 
 - **Month, year, and list views**: browse one month, see the year at a glance, or search the full holiday list.
-- **Poya day highlights**: distinct colours and filters for Poya days and other public holidays.
+- **Simple holiday choices**: switch between all public holidays and Mercantile only, which includes every Poya day. Poya dates keep their distinct calendar highlights.
 - **Upcoming holidays**: a next-holiday countdown and a short list of dates to look forward to.
 - **Bank and mercantile holidays**: each holiday shows whether it is also a bank or mercantile (private-sector) holiday, using the official codes from the Central Bank's list, with a Mercantile filter.
 - **Long weekends and leave breaks**: the calendar bands breaks of three days or more, solid when no leave is needed and dashed when one to five leave days would join a holiday to the weekend.
-- **Your days off**: choose all public holidays or mercantile only, a Monday–Friday or Monday–Saturday week, and how many leave days you can take. Settings stay in your browser.
+- **Personal break planning**: the calendar remembers your holiday choice. In the leave planner, choose a Monday–Friday or Monday–Saturday week and how many leave days you can take.
 - **Leave planner**: the best-value leave ideas for the year, each downloadable as a calendar event that blocks the whole break.
 - **Shareable links**: the address keeps the month, view, filter and open holiday, so any view can be bookmarked or sent.
 - **Light and dark themes**: follows your system setting, with a toggle in the header.

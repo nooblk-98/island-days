@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { colomboToday, monthCells, createICS, longWeekends, holidayClass, leavePlans } from '../src/calendar.js';
+import { colomboToday, monthCells, createICS, longWeekends, holidayClass, isMercantileDayOff, leavePlans } from '../src/calendar.js';
 import { parseCBSL, buildDataset, mergeDatasets, validateDataset, SOURCE } from '../scripts/holidays.mjs';
 const data = JSON.parse(await readFile(new URL('../public/data/holidays.json', import.meta.url)));
 const weekday = (year, month, day) => new Date(Date.UTC(year, month, day)).toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' });
@@ -99,6 +99,17 @@ test('holiday type uses the Central Bank codes, with name rules as a fallback', 
   }
   // The rules agree with the bank's own codes for every saved holiday.
   for (const h of data.holidays) assert.deepEqual(holidayClass(h.name), { bank: h.bank, mercantile: h.mercantile }, h.name);
+});
+test('Mercantile days off include every Poya day while preserving official source flags', () => {
+  const included = data.holidays.filter(isMercantileDayOff);
+  for (const holiday of data.holidays) {
+    assert.equal(included.includes(holiday), holiday.type === 'poya' || holiday.mercantile);
+  }
+  const poya = data.holidays.find(h => h.type === 'poya' && !h.mercantile);
+  assert.ok(poya && included.includes(poya));
+  assert.equal(holidayClass(poya).mercantile, false);
+  const exported = createICS(included, data.fetchedAt, data.years);
+  assert.ok(exported.includes(`UID:${poya.id}@island-days.local`));
 });
 test('leave planner bridges holidays to weekends without overlapping plans', () => {
   // Thursday 2 Apr 2026 off -> Wed 1 Apr holiday through Sun 5 Apr (Good Friday on the 3rd).

@@ -1,4 +1,4 @@
-import { MONTHS, monthCells, colomboToday, formatDate, parseDate, daysBetween, longWeekends, createICS, createBreakICS, holidayClass, leavePlans, addDays, isWeekend } from './calendar.js';
+import { MONTHS, monthCells, colomboToday, formatDate, parseDate, daysBetween, longWeekends, createICS, createBreakICS, holidayClass, isMercantileDayOff, leavePlans, addDays, isWeekend } from './calendar.js';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const today = colomboToday();
@@ -10,14 +10,17 @@ const PREFS_KEY = 'island-days:prefs';
 const prefs = { holidays: 'all', saturday: false, maxLeave: 3 };
 try { Object.assign(prefs, JSON.parse(localStorage.getItem(PREFS_KEY)) || {}); } catch {}
 prefs.maxLeave = Math.min(5, Math.max(1, Number(prefs.maxLeave) || 3));
+prefs.holidays = prefs.holidays === 'mercantile' ? 'mercantile' : 'all';
+state.filter = prefs.holidays;
 const savePrefs = () => { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch {} };
 const weekendDays = () => prefs.saturday ? [0] : [0, 6];
-const breakSource = () => prefs.holidays === 'mercantile' || state.filter === 'mercantile' ? data.holidays.filter(isMercantile) : data.holidays;
+const breakSource = () => data.holidays.filter(holidayScope);
 const yourLongWeekends = () => longWeekends(breakSource(), state.year, { weekend: weekendDays() });
 const yourLeavePlans = (from = '') => leavePlans(breakSource(), state.year, { from, weekend: weekendDays(), maxLeave: prefs.maxLeave });
 const yearHolidays = () => data.holidays.filter(h => Number(h.date.slice(0, 4)) === state.year);
 const isMercantile = h => holidayClass(h).mercantile;
-const matches = h => (state.filter === 'all' || (state.filter === 'mercantile' ? isMercantile(h) : h.type === state.filter)) && h.name.toLowerCase().includes(state.search.toLowerCase());
+const holidayScope = h => state.filter !== 'mercantile' || isMercantileDayOff(h);
+const matches = h => holidayScope(h) && h.name.toLowerCase().includes(state.search.toLowerCase());
 const typeLabel = h => h.type === 'poya' ? 'Poya day' : 'Public holiday';
 const shortDate = (value, extra = {}) => formatDate(value, { day: 'numeric', month: 'short', ...extra });
 const isEstimated = year => data.years[year]?.estimated;
@@ -54,7 +57,7 @@ function holidayRow(h, full = false) {
   return `<button class="upcoming-item" data-holiday="${esc(h.id)}"><span class="date-tile ${h.type}"><b>${Number(h.date.slice(-2))}</b><small>${MONTHS[Number(h.date.slice(5, 7)) - 1].slice(0, 3).toUpperCase()}</small></span><span><span class="upcoming-title">${esc(h.name)}</span><span class="upcoming-meta">${formatDate(h.date, { weekday: 'long' })} · ${typeLabel(h)}${isEstimated(h.date.slice(0, 4)) ? ' · Estimated' : ''}</span></span>${full ? `<span class="list-type ${h.type}">${typeLabel(h)}</span>` : ''}<span class="upcoming-arrow" aria-hidden="true">↗</span></button>`;
 }
 function renderHero() {
-  const next = data.holidays.find(h => h.date >= today);
+  const next = breakSource().find(h => h.date >= today);
   if (!next) {
     $('#next-content').innerHTML = '<h2 class="next-name">More good days are on the way.</h2><p class="dialog-body">The next year’s dates have not been published yet.</p>';
     return;
@@ -62,7 +65,7 @@ function renderHero() {
   const delta = daysBetween(today, next.date);
   $('#next-content').innerHTML = `<div class="next-date"><span class="next-day">${Number(next.date.slice(-2))}</span><span class="next-month">${MONTHS[Number(next.date.slice(5, 7)) - 1].slice(0, 3).toUpperCase()} ${next.date.slice(0, 4)}<br>${formatDate(next.date, { weekday: 'long' })}</span></div><h2 class="next-name">${esc(next.name)}</h2><span class="next-pill"><span aria-hidden="true">◷</span> ${delta === 0 ? 'A LITTLE PAUSE, TODAY' : `${delta} DAY${delta === 1 ? '' : 'S'} TO GO`}${isEstimated(next.date.slice(0, 4)) ? ' · ESTIMATED' : ''}</span>`;
   // The next long weekend (no leave needed), following the visitor's own work week and holidays.
-  const source = prefs.holidays === 'mercantile' ? data.holidays.filter(isMercantile) : data.holidays;
+  const source = breakSource();
   const nextBreak = availableYears.filter(y => y >= thisYear).flatMap(y => longWeekends(source, y, { weekend: weekendDays() })).find(w => w.end >= today);
   if (nextBreak) $('#next-content').insertAdjacentHTML('beforeend', `<p class="next-break"><span>Next long weekend</span><strong>${shortDate(nextBreak.start, { weekday: 'short' })} – ${shortDate(nextBreak.end, { weekday: 'short' })}</strong><em>${nextBreak.days} days off${nextBreak.start <= today ? ' · now' : ` · in ${daysBetween(today, nextBreak.start)} days`}</em></p>`);
   $('#next-holiday').disabled = false;
@@ -157,6 +160,7 @@ function render() {
   const amount = state.view === 'month' ? monthSelected.length : selected.length;
   $('#month-count').textContent = `${amount} holiday${amount === 1 ? '' : 's'}`;
   $('#estimate-note').hidden = !isEstimated(state.year);
+  $('#holiday-scope-note').hidden = state.filter !== 'mercantile';
   $('#month-view').classList.toggle('selected', state.view === 'month');
   $('#list-view').classList.toggle('selected', state.view === 'list');
   $('#month-view').setAttribute('aria-pressed', state.view === 'month');
@@ -176,14 +180,14 @@ function render() {
   });
   if (state.view === 'month') renderMonth();
   else if (state.view === 'year') renderYear();
-  else $('#calendar').innerHTML = selected.length ? `<div class="holiday-list">${selected.map(h => holidayRow(h, true)).join('')}</div>` : '<div class="empty-state">No holidays match your search.<br>Try another name or choose “All holidays”.</div>';
+  else $('#calendar').innerHTML = selected.length ? `<div class="holiday-list">${selected.map(h => holidayRow(h, true)).join('')}</div>` : '<div class="empty-state">No holidays match your search.<br>Try another name or choose “All public holidays”.</div>';
   const coming = selected.filter(h => state.year === thisYear ? h.date >= today : true);
   $('#upcoming-count').textContent = state.search ? `${coming.length} found` : `${state.year}`;
   $('#upcoming-list').innerHTML = coming.length ? coming.slice(0, 3).map(h => holidayRow(h)).join('') : '<p class="empty-state">No upcoming holidays match.<br>Explore the full year below.</p>';
-  $('#holiday-total').textContent = new Set(all.map(h => h.date)).size;
+  $('#holiday-total').textContent = new Set(all.filter(holidayScope).map(h => h.date)).size;
   $('#weekend-total').textContent = yourLongWeekends().length;
   $('#summary-year').textContent = state.year;
-  $('#week-note').textContent = `Based on ${prefs.saturday ? 'a Sunday-only' : 'a Saturday–Sunday'} weekend${prefs.holidays === 'mercantile' ? ' and mercantile holidays' : ''}.`;
+  $('#week-note').textContent = `Based on ${prefs.saturday ? 'a Sunday-only' : 'a Saturday–Sunday'} weekend${state.filter === 'mercantile' ? ' and mercantile holidays' : ''}.`;
   $('#calendar').setAttribute('aria-busy', 'false');
   writeURL();
 }
@@ -209,7 +213,7 @@ function readURL() {
   const view = ['year', 'list'].includes(params.get('view')) ? params.get('view') : 'month';
   let year = month ? Number(month[1]) : Number(params.get('y')) || thisYear;
   if (!availableYears.includes(year)) year = availableYears.includes(thisYear) ? thisYear : availableYears[0];
-  Object.assign(state, { view, year, month: month && Number(month[1]) === year ? Math.min(11, Math.max(0, Number(month[2]) - 1)) : year === thisYear ? Number(today.slice(5, 7)) - 1 : 0, filter: ['poya', 'public', 'mercantile'].includes(params.get('filter')) ? params.get('filter') : 'all' });
+  Object.assign(state, { view, year, month: month && Number(month[1]) === year ? Math.min(11, Math.max(0, Number(month[2]) - 1)) : year === thisYear ? Number(today.slice(5, 7)) - 1 : 0, filter: params.get('filter') === 'mercantile' ? 'mercantile' : 'all' });
   return params.get('holiday');
 }
 window.addEventListener('popstate', () => {
@@ -244,7 +248,7 @@ $('#next').onclick = () => navigate(1);
 $('#today').onclick = () => {
   if (!data) return;
   state.year = availableYears.includes(thisYear) ? thisYear : availableYears[0];
-  state.month = Number(today.slice(5, 7)) - 1; state.view = 'month'; state.filter = 'all'; resetSearch(); render();
+  state.month = Number(today.slice(5, 7)) - 1; state.view = 'month'; resetSearch(); render();
   if (state.year !== thisYear) notify(`Dates for ${thisYear} are not available yet. Showing ${state.year}.`);
 };
 $('#year').onclick = event => { const b = event.target.closest('[data-year]'); if (b) { state.year = Number(b.dataset.year); render(); } };
@@ -254,7 +258,7 @@ $('#nav-calendar').onclick = () => { state.view = 'month'; resetSearch(); render
 $('#nav-year').onclick = () => { state.view = 'year'; resetSearch(); render(); };
 $('#all-holidays').onclick = () => { state.view = 'list'; render(); $('#calendar-section').scrollIntoView({ block: 'start', behavior: 'smooth' }); };
 $('#search').oninput = event => { state.search = event.target.value; if (state.search) state.view = 'list'; render(); };
-document.querySelectorAll('[data-filter]').forEach(button => { button.onclick = () => { state.filter = button.dataset.filter; render(); }; });
+document.querySelectorAll('[data-filter]').forEach(button => { button.onclick = () => { state.filter = button.dataset.filter; prefs.holidays = state.filter; savePrefs(); render(); }; });
 document.addEventListener('click', event => {
   const holiday = event.target.closest('[data-holiday]');
   if (holiday) showHoliday(holiday.dataset.holiday);
@@ -265,8 +269,7 @@ document.addEventListener('click', event => {
     const [key, value] = pref.dataset.pref.split(':');
     prefs[key] = key === 'maxLeave' ? Number(value) : key === 'saturday' ? value === 'true' : value;
     savePrefs(); render();
-    const planner = $('#detail-dialog').dataset.kind === 'planner';
-    $('#dialog-content').innerHTML = planner ? plannerContent() : settingsContent();
+    $('#dialog-content').innerHTML = plannerContent();
     $(`[data-pref="${pref.dataset.pref}"]`)?.focus();
   }
   const breakButton = event.target.closest('[data-break]');
@@ -288,21 +291,18 @@ document.addEventListener('click', event => {
   const single = event.target.closest('[data-download]');
   if (single) download(data.holidays.filter(h => h.id === single.dataset.download), 'sri-lanka-holiday.ics');
 });
-$('#export').onclick = () => { if (data) download(yearHolidays(), `sri-lanka-holidays-${state.year}.ics`); };
+$('#export').onclick = () => { if (data) download(yearHolidays().filter(holidayScope), `sri-lanka-${state.filter === 'mercantile' ? 'mercantile-' : ''}holidays-${state.year}.ics`); };
 $('#weekend-button').onclick = () => {
   if (!data) return;
   const weekends = yourLongWeekends();
-  openDialog(`<span class="dialog-symbol" aria-hidden="true">↟</span><h2 id="dialog-title" class="dialog-heading">A longer little break.</h2><p class="dialog-body">${state.year} breaks of three days or more, combining ${prefs.holidays === 'mercantile' ? 'mercantile' : 'public'} holidays with your ${prefs.saturday ? 'Sunday' : 'Saturday and Sunday'}. No extra leave days included.${isEstimated(state.year) ? ' Holiday dates for this year are estimates.' : ''}</p>${weekends.map(w => `<div class="weekend-row"><span>${formatDate(w.start, { day: 'numeric', month: 'short' })} – ${formatDate(w.end, { day: 'numeric', month: 'short' })}<small>${formatDate(w.start, { weekday: 'long' })} to ${formatDate(w.end, { weekday: 'long' })}</small></span><strong>${w.days}<small>days off</small></strong></div>`).join('') || '<p class="dialog-body">No long weekends are listed for this year yet.</p>'}<p class="dialog-body">Your working week and holiday entitlement may differ. Verify dates before booking.</p>`);
+  openDialog(`<span class="dialog-symbol" aria-hidden="true">↟</span><h2 id="dialog-title" class="dialog-heading">A longer little break.</h2><p class="dialog-body">${state.year} breaks of three days or more, combining ${state.filter === 'mercantile' ? 'mercantile' : 'public'} holidays with your ${prefs.saturday ? 'Sunday' : 'Saturday and Sunday'}. No extra leave days included.${isEstimated(state.year) ? ' Holiday dates for this year are estimates.' : ''}</p>${weekends.map(w => `<div class="weekend-row"><span>${formatDate(w.start, { day: 'numeric', month: 'short' })} – ${formatDate(w.end, { day: 'numeric', month: 'short' })}<small>${formatDate(w.start, { weekday: 'long' })} to ${formatDate(w.end, { weekday: 'long' })}</small></span><strong>${w.days}<small>days off</small></strong></div>`).join('') || '<p class="dialog-body">No long weekends are listed for this year yet.</p>'}<p class="dialog-body">Your working week and holiday entitlement may differ. Verify dates before booking.</p>`);
 };
 function prefsControls() {
   const group = (label, key, options) => `<div class="pref-group"><span class="pref-label" id="pref-${key}">${label}</span><div class="filters" role="group" aria-labelledby="pref-${key}">${options.map(([value, text]) => {
     const active = String(prefs[key]) === String(value);
     return `<button class="filter${active ? ' active' : ''}" data-pref="${key}:${value}" aria-pressed="${active}">${text}</button>`;
   }).join('')}</div></div>`;
-  return `<div class="prefs">${group('Holidays I get', 'holidays', [['all', 'All public holidays'], ['mercantile', 'Mercantile only']])}${group('I work', 'saturday', [[false, 'Mon – Fri'], [true, 'Mon – Sat']])}${group('Leave days I can take', 'maxLeave', [1, 2, 3, 4, 5].map(n => [n, `Up to ${n}`]))}</div>`;
-}
-function settingsContent() {
-  return `<span class="dialog-symbol" aria-hidden="true">⚙</span><h2 id="dialog-title" class="dialog-heading">Your days off.</h2><p class="dialog-body">Long weekends, leave ideas and weekend colours follow these settings. They are saved in this browser only.</p>${prefsControls()}<p class="dialog-body planner-hint">Government and bank staff usually get every public holiday; most private-sector staff get mercantile holidays only.</p>`;
+  return `<div class="prefs">${group('I work', 'saturday', [[false, 'Mon – Fri'], [true, 'Mon – Sat']])}${group('Leave days I can take', 'maxLeave', [1, 2, 3, 4, 5].map(n => [n, `Up to ${n}`]))}</div>`;
 }
 function plannerContent() {
   const plans = yourLeavePlans(state.year === thisYear ? today : '');
@@ -312,7 +312,7 @@ function plannerContent() {
 let withReminders = true;
 function subscribeContent() {
   const suffix = withReminders ? '-reminders.ics' : '.ics';
-  const feeds = [['holidays.ics', 'All public holidays', 'Poya, public and bank holidays. Best for government and bank workers.'], ['holidays-mercantile.ics', 'Mercantile holidays', 'Only the days most private-sector offices close.']];
+  const feeds = [['holidays.ics', 'All public holidays', 'Poya, public and bank holidays. Best for government and bank workers.'], ['holidays-mercantile.ics', 'Mercantile + Poya holidays', 'Mercantile holidays and every full moon Poya day.']];
   return `<span class="dialog-symbol" aria-hidden="true">↻</span><h2 id="dialog-title" class="dialog-heading">Always up to date.</h2><p class="dialog-body">Subscribe once and your calendar app checks for changes automatically, including newly announced and corrected dates.</p><div class="filters reminder-switch" role="group" aria-label="Reminders"><button class="filter${withReminders ? ' active' : ''}" data-reminders="on" aria-pressed="${withReminders}">🔔 Remind me a day and a week before</button><button class="filter${withReminders ? '' : ' active'}" data-reminders="off" aria-pressed="${!withReminders}">No reminders</button></div><p class="dialog-body planner-hint">Reminders work in Apple Calendar and Outlook. Google Calendar uses its own notification settings for subscribed calendars.</p>${feeds.map(([file, title, text]) => {
     const path = file.replace('.ics', suffix);
     const https = `${location.origin}/${path}`, webcal = `webcal://${location.host}/${path}`;
@@ -327,7 +327,6 @@ $('#planner-button').onclick = () => { if (data) openDialog(plannerContent(), 'p
 const syncThemeButton = () => $('#theme-toggle').setAttribute('aria-label', `Switch to ${document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'} theme`);
 $('#theme-toggle').onclick = () => { window.islandTheme?.toggle(); syncThemeButton(); };
 syncThemeButton();
-$('#prefs-button').onclick =() => { if (data) openDialog(settingsContent(), 'settings'); };
 let embedTheme = 'auto', embedMercantile = false;
 function embedCode() {
   const params = new URLSearchParams();

@@ -43,6 +43,8 @@ export function holidayClass(holiday) {
   const mercantile = MERCANTILE.some(rule => rule.test(n));
   return { bank: mercantile || BANK.some(rule => rule.test(n)), mercantile };
 }
+// The site's Mercantile view includes every Poya day, without changing the source's official flags.
+export const isMercantileDayOff = holiday => holiday.type === 'poya' || holidayClass(holiday).mercantile;
 export const isWeekend = (value, weekend = [0, 6]) => weekend.includes(parseDate(value).getUTCDay());
 // Suggest short leave blocks that bridge holidays and weekends into longer breaks.
 export function leavePlans(holidays, year, { maxLeave = 3, from = '', weekend = [0, 6] } = {}) {

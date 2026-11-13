@@ -1,7 +1,7 @@
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { validateDataset } from './holidays.mjs';
-import { createICS, holidayClass, formatDate, longWeekends } from '../src/calendar.js';
+import { createICS, holidayClass, isMercantileDayOff, formatDate, longWeekends } from '../src/calendar.js';
 const data = JSON.parse(await readFile(new URL('../public/data/holidays.json', import.meta.url), 'utf8'));
 validateDataset(data);
 const site = (process.env.SITE_URL || 'https://dayoff.itsnooblk.com').replace(/\/+$/, '');
@@ -17,7 +17,7 @@ await cp(new URL('../src/widget/', import.meta.url), new URL('widget/', dist), {
 // Subscribable calendar feeds: calendar apps re-fetch these, so every deploy reaches subscribers.
 const feeds = [
   { file: 'holidays.ics', holidays: data.holidays, name: 'Sri Lanka Public Holidays', description: 'Sri Lanka public, bank and Poya holidays from Island Days.' },
-  { file: 'holidays-mercantile.ics', holidays: data.holidays.filter(h => holidayClass(h).mercantile), name: 'Sri Lanka Mercantile Holidays', description: 'Sri Lanka mercantile (private-sector) holidays from Island Days.' }
+  { file: 'holidays-mercantile.ics', holidays: data.holidays.filter(isMercantileDayOff), name: 'Sri Lanka Mercantile and Poya Holidays', description: 'Sri Lanka mercantile holidays and all Poya days from Island Days.' }
 ];
 for (const feed of feeds) {
   await writeFile(new URL(feed.file, dist), createICS(feed.holidays, data.fetchedAt, data.years, { ...feed, feed: true }));
