@@ -49,21 +49,27 @@ jobs:
             echo 'Calendar checks still run. Add the Cloudflare secrets and project variable described in DEPLOYMENT.md, then run this workflow again to enable monthly updates and publishing.' >> "$GITHUB_STEP_SUMMARY"
           fi
       - run: npm ci --no-audit --no-fund
+      # Every run re-checks the Central Bank list so the site's "Last checked" date stays fresh.
+      # On a code push a source outage must not block the deploy, so the saved data is used instead.
       - name: Fetch and validate Central Bank holiday lists
-        if: steps.settings.outputs.ready == 'true' && github.event_name != 'push'
+        if: steps.settings.outputs.ready == 'true'
+        continue-on-error: ${{ github.event_name == 'push' }}
         run: npm run refresh
       - run: npm test
       - run: npm run build
-      - name: Save last successful data check
-        if: steps.settings.outputs.ready == 'true' && github.event_name != 'push'
+      # Commit only when a holiday actually changed, not just the check timestamp.
+      - name: Save changed holiday data
+        if: steps.settings.outputs.ready == 'true'
         shell: bash
         run: |
-          git config user.name 'Lahiru S Liyanage'
-          git config user.email '125950957+nooblk-98@users.noreply.github.com'
-          git add public/data/holidays.json
-          if ! git diff --staged --quiet; then
+          if [ "$(node scripts/data-changed.mjs)" = true ]; then
+            git config user.name 'Lahiru S Liyanage'
+            git config user.email '125950957+nooblk-98@users.noreply.github.com'
+            git add public/data/holidays.json
             git commit -m 'Update Sri Lanka holiday data [skip ci]'
             git push origin HEAD:main
+          else
+            echo 'Holiday data unchanged; nothing to commit.'
           fi
       - name: Deploy to Cloudflare Pages
         if: steps.settings.outputs.ready == 'true'
