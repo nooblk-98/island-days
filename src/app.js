@@ -1,28 +1,42 @@
-import { MONTHS, monthCells, colomboToday, formatDate, parseDate, daysBetween, longWeekends, createICS } from './calendar.js';
+import { MONTHS, monthCells, colomboToday, formatDate, parseDate, daysBetween, longWeekends, createICS, holidayClass, leavePlans } from './calendar.js';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const today = colomboToday();
 const thisYear = Number(today.slice(0, 4));
-let data, availableYears = [], focusedBeforeDialog, toastTimer;
+let data, availableYears = [], focusedBeforeDialog, toastTimer, plannerMode = 'all';
 const state = { year: thisYear, month: Number(today.slice(5, 7)) - 1, view: 'month', filter: 'all', search: '' };
 const yearHolidays = () => data.holidays.filter(h => Number(h.date.slice(0, 4)) === state.year);
-const matches = h => (state.filter === 'all' || h.type === state.filter) && h.name.toLowerCase().includes(state.search.toLowerCase());
+const isMercantile = h => holidayClass(h.name).mercantile;
+const matches = h => (state.filter === 'all' || (state.filter === 'mercantile' ? isMercantile(h) : h.type === state.filter)) && h.name.toLowerCase().includes(state.search.toLowerCase());
 const typeLabel = h => h.type === 'poya' ? 'Poya day' : 'Public holiday';
+const shortDate = (value, extra = {}) => formatDate(value, { day: 'numeric', month: 'short', ...extra });
 const isEstimated = year => data.years[year]?.estimated;
 function notify(message) {
   clearTimeout(toastTimer); $('#toast').textContent = message; $('#toast').hidden = false;
   toastTimer = setTimeout(() => { $('#toast').hidden = true; }, 4500);
 }
 function openDialog(content) {
-  focusedBeforeDialog = document.activeElement;
+  const dialog = $('#detail-dialog');
+  if (!dialog.open) focusedBeforeDialog = document.activeElement;
   $('#dialog-content').innerHTML = content;
-  $('#detail-dialog').showModal();
+  if (!dialog.open) dialog.showModal();
   $('#close-dialog').focus();
 }
 function showHoliday(id) {
   const h = data.holidays.find(holiday => holiday.id === id);
   if (!h) return;
-  openDialog(`<span class="dialog-symbol" aria-hidden="true">${h.type === 'poya' ? '☾' : '✳'}</span><span class="dialog-tag ${h.type}">${typeLabel(h)}</span><h2 class="dialog-heading" id="dialog-title">${esc(h.name)}</h2><p class="dialog-date">${formatDate(h.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · Sri Lanka</p>${isEstimated(h.date.slice(0, 4)) ? '<p class="notice">This date is an estimate from the source and may change.</p>' : ''}<p class="dialog-body">A little room to slow down. This holiday is listed in the Sri Lanka public holiday calendar. Check the source for the latest details before making plans.</p><button class="dialog-action" data-download="${esc(h.id)}">↓ Add to my calendar</button><a class="dialog-source" href="${esc(h.sourceUrl)}" target="_blank" rel="noopener noreferrer">Read more at PublicHolidays.lk ↗</a>`);
+  openDialog(`<span class="dialog-symbol" aria-hidden="true">${h.type === 'poya' ? '☾' : '✳'}</span><span class="dialog-tag ${h.type}">${typeLabel(h)}</span><h2 class="dialog-heading" id="dialog-title">${esc(h.name)}</h2><p class="dialog-date">${formatDate(h.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · Sri Lanka</p>${isEstimated(h.date.slice(0, 4)) ? '<p class="notice">This date is an estimate from the source and may change.</p>' : ''}${classNote(h)}<p class="dialog-body">A little room to slow down. Check the source for the latest details before making plans.</p><button class="dialog-action" data-download="${esc(h.id)}">↓ Add to my calendar</button><a class="dialog-source" href="${esc(h.sourceUrl)}" target="_blank" rel="noopener noreferrer">Read more at PublicHolidays.lk ↗</a>`);
+}
+function classNote(h) {
+  const kind = holidayClass(h.name);
+  const tags = ['Public', ...(kind.bank ? ['Bank'] : []), ...(kind.mercantile ? ['Mercantile'] : [])].map(t => `<span class="class-tag${t === 'Mercantile' ? ' mercantile' : ''}">${t}</span>`).join('');
+  const note = kind.mercantile ? 'Most private-sector offices are closed too.' : kind.bank ? 'Not a mercantile holiday, so many private-sector offices stay open.' : 'Check with your employer whether private-sector offices close.';
+  return `<div class="class-tags" aria-label="Holiday type">${tags}</div><p class="dialog-body class-note">${note}</p>`;
+}
+function showDate(date) {
+  const events = data.holidays.filter(h => h.date === date && matches(h));
+  if (events.length === 1) return showHoliday(events[0].id);
+  openDialog(`<span class="dialog-symbol" aria-hidden="true">✳</span><h2 class="dialog-heading" id="dialog-title">${formatDate(date, { weekday: 'long', day: 'numeric', month: 'long' })}</h2><p class="dialog-body">${events.length} holidays fall on this day.</p><div class="holiday-list">${events.map(h => holidayRow(h)).join('')}</div>`);
 }
 function holidayRow(h, full = false) {
   return `<button class="upcoming-item" data-holiday="${esc(h.id)}"><span class="date-tile ${h.type}"><b>${Number(h.date.slice(-2))}</b><small>${MONTHS[Number(h.date.slice(5, 7)) - 1].slice(0, 3).toUpperCase()}</small></span><span><span class="upcoming-title">${esc(h.name)}</span><span class="upcoming-meta">${formatDate(h.date, { weekday: 'long' })} · ${typeLabel(h)}${isEstimated(h.date.slice(0, 4)) ? ' · Estimated' : ''}</span></span>${full ? `<span class="list-type ${h.type}">${typeLabel(h)}</span>` : ''}<span class="upcoming-arrow" aria-hidden="true">↗</span></button>`;
@@ -46,7 +60,20 @@ function renderMonth() {
     if (!byDate.has(h.date)) byDate.set(h.date, []);
     byDate.get(h.date).push(h);
   }
-  $('#calendar').innerHTML = `<div class="calendar-shell"><div class="weekdays">${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => `<span>${d}</span>`).join('')}</div><div class="month-grid">${cells.map(cell => `<div class="day-cell${cell.inMonth ? '' : ' outside'}${cell.weekend ? ' weekend' : ''}${cell.date === today ? ' today' : ''}"><span class="day-number"${cell.date === today ? ' aria-current="date"' : ''}>${cell.day}</span>${cell.date === today ? '<span class="today-word">TODAY</span>' : ''}${(byDate.get(cell.date) || []).map(h => `<button class="holiday-chip ${h.type}" data-holiday="${esc(h.id)}" aria-label="${esc(`${h.name}, ${formatDate(h.date)}`)}">${esc(h.name)}</button>`).join('')}</div>`).join('')}</div></div>`;
+  const showsToday = today.startsWith(`${state.year}-${String(state.month + 1).padStart(2, '0')}-`);
+  const todayColumn = (parseDate(today).getUTCDay() + 6) % 7;
+  const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, i) => `<span${showsToday && i === todayColumn ? ' class="is-current"' : ''}>${d}</span>`).join('');
+  const days = cells.map(cell => {
+    if (!cell.inMonth) return '<div class="cal-day is-empty" aria-hidden="true"></div>';
+    const events = byDate.get(cell.date) || [];
+    const isToday = cell.date === today;
+    const cls = ['cal-dot', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', isToday && 'is-today'].filter(Boolean).join(' ');
+    const current = isToday ? ' aria-current="date"' : '';
+    if (!events.length) return `<div class="cal-day"><span class="${cls}"${current}>${cell.day}</span></div>`;
+    const names = events.map(h => h.name);
+    return `<div class="cal-day"><button class="${cls}" data-date="${cell.date}"${current} aria-label="${esc(`${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${names.join(', ')}`)}">${cell.day}</button><span class="cal-name" aria-hidden="true">${esc(names.join(' · '))}</span></div>`;
+  }).join('');
+  $('#calendar').innerHTML = `<div class="cal"><div class="cal-weekdays">${weekdays}</div><div class="cal-grid">${days}</div></div>`;
 }
 function renderYear() {
   const holidays = yearHolidays().filter(matches);
@@ -130,6 +157,12 @@ document.querySelectorAll('[data-filter]').forEach(button => { button.onclick = 
 document.addEventListener('click', event => {
   const holiday = event.target.closest('[data-holiday]');
   if (holiday) showHoliday(holiday.dataset.holiday);
+  const date = event.target.closest('[data-date]');
+  if (date) showDate(date.dataset.date);
+  const mode = event.target.closest('[data-planner]');
+  if (mode) { plannerMode = mode.dataset.planner; $('#dialog-content').innerHTML = plannerContent(); $(`[data-planner="${plannerMode}"]`).focus(); }
+  const copy = event.target.closest('[data-copy]');
+  if (copy) copyLink(copy.dataset.copy);
   const month = event.target.closest('[data-month]');
   if (month) { state.month = Number(month.dataset.month); state.view = 'month'; render(); }
   const single = event.target.closest('[data-download]');
@@ -141,7 +174,27 @@ $('#weekend-button').onclick = () => {
   const weekends = longWeekends(data.holidays, state.year);
   openDialog(`<span class="dialog-symbol" aria-hidden="true">↟</span><h2 id="dialog-title" class="dialog-heading">A longer little break.</h2><p class="dialog-body">${state.year} breaks of three days or more, combining public holidays with Saturday and Sunday. No extra leave days included.${isEstimated(state.year) ? ' Holiday dates for this year are estimates.' : ''}</p>${weekends.map(w => `<div class="weekend-row"><span>${formatDate(w.start, { day: 'numeric', month: 'short' })} – ${formatDate(w.end, { day: 'numeric', month: 'short' })}<small>${formatDate(w.start, { weekday: 'long' })} to ${formatDate(w.end, { weekday: 'long' })}</small></span><strong>${w.days}<small>days off</small></strong></div>`).join('') || '<p class="dialog-body">No long weekends are listed for this year yet.</p>'}<p class="dialog-body">Your working week and holiday entitlement may differ. Verify dates before booking.</p>`);
 };
-$('#about').onclick = () => openDialog('<span class="dialog-symbol" aria-hidden="true">✳</span><h2 id="dialog-title" class="dialog-heading">For a little more living.</h2><p class="dialog-body">Island Days is an independent calendar for Sri Lanka’s public holidays. Find Poya days, plan a long weekend, and save the year to your favourite calendar.</p><p class="dialog-body">Holiday dates are sourced from PublicHolidays.lk. The calendar displays the last successful data check; estimated years are labelled. Poya days are public holidays too, and are highlighted separately for easy browsing.</p><p class="dialog-body">All dates use the Sri Lanka calendar day (Asia/Colombo). Holiday dates and working arrangements can change. Verify with the source or your employer before making plans.</p><a class="dialog-action" href="https://publicholidays.lk/" target="_blank" rel="noopener noreferrer">Visit the source ↗</a>');
+function plannerContent() {
+  const holidays = plannerMode === 'mercantile' ? data.holidays.filter(isMercantile) : data.holidays;
+  const plans = leavePlans(holidays, state.year, { from: state.year === thisYear ? today : '' });
+  const modes = [['all', 'All public holidays'], ['mercantile', 'Mercantile only']].map(([key, label]) => `<button class="filter${plannerMode === key ? ' active' : ''}" data-planner="${key}" aria-pressed="${plannerMode === key}">${label}</button>`).join('');
+  const rows = plans.map(p => `<div class="weekend-row"><span>Take ${p.leaveDates.map(d => shortDate(d, { weekday: 'short' })).join(', ')} off<small>${shortDate(p.start, { weekday: 'short' })} – ${shortDate(p.end, { weekday: 'short' })}</small></span><strong>${p.days}<small>days off for ${p.leave} leave day${p.leave === 1 ? '' : 's'}</small></strong></div>`).join('');
+  return `<span class="dialog-symbol" aria-hidden="true">✦</span><h2 id="dialog-title" class="dialog-heading">More days off, less leave.</h2><p class="dialog-body">Up to three leave days that join ${state.year} holidays to a weekend. The best value for each break is shown.${isEstimated(state.year) ? ' Holiday dates for this year are estimates.' : ''}</p><div class="filters planner-modes" role="group" aria-label="Holidays you get off">${modes}</div><p class="dialog-body planner-hint">${plannerMode === 'mercantile' ? 'For private-sector workers who get mercantile holidays only.' : 'For government, bank and other workers who get every public holiday.'}</p>${rows || `<p class="dialog-body">No leave ideas ${state.year === thisYear ? 'left ' : ''}for ${state.year}.</p>`}<p class="dialog-body">Your working week and leave rules may differ. Verify dates before booking.</p>`;
+}
+function subscribeContent() {
+  const feeds = [['holidays.ics', 'All public holidays', 'Poya, public and bank holidays. Best for government and bank workers.'], ['holidays-mercantile.ics', 'Mercantile holidays', 'Only the days most private-sector offices close.']];
+  return `<span class="dialog-symbol" aria-hidden="true">↻</span><h2 id="dialog-title" class="dialog-heading">Always up to date.</h2><p class="dialog-body">Subscribe once and your calendar app checks for changes automatically, including newly announced and corrected dates.</p>${feeds.map(([file, title, text]) => {
+    const https = `${location.origin}/${file}`, webcal = `webcal://${location.host}/${file}`;
+    return `<section class="feed"><h3>${title}</h3><p>${text}</p><div class="feed-actions"><a class="dialog-action" href="${esc(webcal)}">Apple · Outlook</a><a class="feed-link" href="https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcal)}" target="_blank" rel="noopener noreferrer">Google Calendar ↗</a><button class="feed-link" data-copy="${esc(https)}">Copy link</button></div></section>`;
+  }).join('')}<p class="dialog-body">Elsewhere, paste the link into your calendar’s “Subscribe” or “From URL” option. Updates can take a day to appear.</p>`;
+}
+async function copyLink(url) {
+  try { await navigator.clipboard.writeText(url); notify('Link copied. Paste it into your calendar’s “Subscribe” option.'); }
+  catch { notify(url); }
+}
+$('#planner-button').onclick = () => { if (data) openDialog(plannerContent()); };
+$('#subscribe').onclick = () => openDialog(subscribeContent());
+$('#about').onclick =() => openDialog('<span class="dialog-symbol" aria-hidden="true">✳</span><h2 id="dialog-title" class="dialog-heading">For a little more living.</h2><p class="dialog-body">Island Days is an independent calendar for Sri Lanka’s public holidays. Find Poya days, plan a long weekend, and save the year to your favourite calendar.</p><p class="dialog-body">Holiday dates are sourced from PublicHolidays.lk. The calendar displays the last successful data check; estimated years are labelled. Poya days are public holidays too, and are highlighted separately for easy browsing.</p><p class="dialog-body">All dates use the Sri Lanka calendar day (Asia/Colombo). Holiday dates and working arrangements can change. Verify with the source or your employer before making plans.</p><a class="dialog-action" href="https://publicholidays.lk/" target="_blank" rel="noopener noreferrer">Visit the source ↗</a>');
 $('#close-dialog').onclick = () => $('#detail-dialog').close();
 $('#detail-dialog').addEventListener('close', () => { if (focusedBeforeDialog?.isConnected) focusedBeforeDialog.focus(); });
 $('#detail-dialog').addEventListener('click', event => { if (event.target === $('#detail-dialog')) { const r = event.target.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) event.target.close(); } });

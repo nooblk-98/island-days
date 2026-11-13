@@ -32,6 +32,38 @@ export function longWeekends(holidays, year) {
   }
   return results;
 }
+// Bank / mercantile status per the Central Bank of Sri Lanka holiday lists (gazetted under the Holidays Act No. 29 of 1971).
+// Every gazetted holiday is a bank holiday; only these are also mercantile (private-sector) holidays.
+const MERCANTILE = [/thai pongal/, /^(national|independence) day/, /^day prior to sinhala/, /^sinhala (&|and) tamil new year/, /^may day/, /^day following vesak/, /milad/, /christmas/];
+const BANK = [/full moon poya/, /mahasiv/, /^e?id[ -]ul[ -]?(fitr|alha|adha|allah)/, /good friday/, /deepa[vw]ali/, ...MERCANTILE];
+export function holidayClass(name) {
+  const n = String(name).toLowerCase();
+  const mercantile = MERCANTILE.some(rule => rule.test(n));
+  return { bank: mercantile || BANK.some(rule => rule.test(n)), mercantile };
+}
+export const isWeekend = value => [0, 6].includes(parseDate(value).getUTCDay());
+// Suggest short leave blocks that bridge holidays and weekends into longer breaks.
+export function leavePlans(holidays, year, { maxLeave = 3, from = '' } = {}) {
+  const days = new Set(holidays.map(h => h.date));
+  const off = value => days.has(value) || isWeekend(value);
+  const seen = new Set(), candidates = [];
+  for (const anchor of [...days].filter(d => d.startsWith(`${year}-`) && !isWeekend(d)).sort()) {
+    for (let s = -(maxLeave + 4); s <= 0; s++) for (let e = 0; e <= maxLeave + 4; e++) {
+      const start = addDays(anchor, s), end = addDays(anchor, e), key = `${start}/${end}`;
+      if (seen.has(key) || off(addDays(start, -1)) || off(addDays(end, 1))) continue;
+      seen.add(key);
+      const leaveDates = [];
+      for (let d = start; d <= end; d = addDays(d, 1)) if (!off(d)) leaveDates.push(d);
+      const total = daysBetween(start, end) + 1;
+      if (!leaveDates.length || leaveDates.length > maxLeave || total < 4 || total / leaveDates.length < 2) continue;
+      candidates.push({ start, end, days: total, leave: leaveDates.length, leaveDates });
+    }
+  }
+  candidates.sort((a, b) => b.days / b.leave - a.days / a.leave || b.days - a.days || a.start.localeCompare(b.start));
+  const picked = [];
+  for (const plan of candidates) if (!picked.some(p => plan.start <= p.end && p.start <= plan.end)) picked.push(plan);
+  return picked.filter(p => p.start.startsWith(`${year}-`) && p.end >= from).sort((a, b) => a.start.localeCompare(b.start));
+}
 const escapeICS = value => value.replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/;/g, '\\;').replace(/,/g, '\\,');
 function foldLine(line) {
   const encoder = new TextEncoder();
@@ -43,12 +75,16 @@ function foldLine(line) {
   }
   return result + current;
 }
-export function createICS(holidays, fetchedAt, estimatedYears = {}) {
+export function createICS(holidays, fetchedAt, estimatedYears = {}, { name = 'Sri Lanka Public Holidays', description = '', feed = false } = {}) {
   const stamp = new Date(fetchedAt).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Island Days//Sri Lanka Holidays//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:Sri Lanka Public Holidays'];
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Island Days//Sri Lanka Holidays//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', `X-WR-CALNAME:${escapeICS(name)}`];
+  if (description) lines.push(`X-WR-CALDESC:${escapeICS(description)}`);
+  if (feed) lines.push('REFRESH-INTERVAL;VALUE=DURATION:P1D', 'X-PUBLISHED-TTL:P1D');
   for (const h of holidays) {
     const estimated = estimatedYears[h.date.slice(0, 4)]?.estimated;
-    lines.push('BEGIN:VEVENT', `UID:${h.id}@island-days.local`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${h.date.replace(/-/g, '')}`, `DTEND;VALUE=DATE:${addDays(h.date, 1).replace(/-/g, '')}`, `SUMMARY:${escapeICS(h.name)}${estimated ? ' (estimated)' : ''}`, `DESCRIPTION:${escapeICS(`Source: ${h.sourceUrl}\n${estimated ? 'Estimated date. ' : ''}Dates may change. Verify before making plans.`)}`, `URL:${h.sourceUrl}`, 'TRANSP:TRANSPARENT', 'END:VEVENT');
+    const kind = holidayClass(h.name);
+    const categories = [h.type === 'poya' ? 'Poya day' : 'Public holiday', ...(kind.bank ? ['Bank holiday'] : []), ...(kind.mercantile ? ['Mercantile holiday'] : [])];
+    lines.push('BEGIN:VEVENT', `UID:${h.id}@island-days.local`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${h.date.replace(/-/g, '')}`, `DTEND;VALUE=DATE:${addDays(h.date, 1).replace(/-/g, '')}`, `SUMMARY:${escapeICS(h.name)}${estimated ? ' (estimated)' : ''}`, `CATEGORIES:${categories.map(escapeICS).join(',')}`, `DESCRIPTION:${escapeICS(`${categories.join(' · ')}\nSource: ${h.sourceUrl}\n${estimated ? 'Estimated date. ' : ''}Dates may change. Verify before making plans.`)}`, `URL:${h.sourceUrl}`, 'TRANSP:TRANSPARENT', 'END:VEVENT');
   }
   lines.push('END:VCALENDAR');
   return lines.map(foldLine).join('\r\n') + '\r\n';

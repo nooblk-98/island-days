@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { colomboToday, monthCells, createICS, longWeekends } from '../src/calendar.js';
+import { colomboToday, monthCells, createICS, longWeekends, holidayClass, leavePlans } from '../src/calendar.js';
 import { parseSource, mergeDatasets, validateDataset } from '../scripts/holidays.mjs';
 const data = JSON.parse(await readFile(new URL('../public/data/holidays.json', import.meta.url)));
 function fixture(year = 2026) {
@@ -68,4 +68,31 @@ test('ICS uses exclusive next-day end dates across year boundaries and marks est
 test('long weekends combine adjacent holidays without counting a weekend twice', () => {
   const weekends = longWeekends([{ date: '2026-04-03' }, { date: '2026-04-06' }, { date: '2026-04-03' }], 2026);
   assert.deepEqual(weekends, [{ start: '2026-04-03', end: '2026-04-06', days: 4 }]);
+});
+test('bank and mercantile status follows the Central Bank holiday list', () => {
+  for (const name of ['Tamil Thai Pongal Day', 'National Day', 'Day prior to Sinhala & Tamil New Year Day', 'Sinhala & Tamil New Year Day', 'May Day', 'Day following Vesak Full Moon Poya Day', 'Milad un-Nabi', 'Christmas Day']) {
+    assert.deepEqual(holidayClass(name), { bank: true, mercantile: true }, name);
+  }
+  for (const name of ['Vesak Full Moon Poya Day', 'Adhi Poson Full Moon Poya Day', 'Mahasivarathri Day', 'Id Ul-Fitr', 'Id Ul-Alha', 'Good Friday', 'Deepavali']) {
+    assert.deepEqual(holidayClass(name), { bank: true, mercantile: false }, name);
+  }
+  assert.deepEqual(holidayClass('Special Public Holiday'), { bank: false, mercantile: false });
+  for (const h of data.holidays) assert.ok(holidayClass(h.name).bank, `unclassified holiday: ${h.name}`);
+});
+test('leave planner bridges holidays to weekends without overlapping plans', () => {
+  // Thursday 2 Apr 2026 off -> Wed 1 Apr holiday through Sun 5 Apr (Good Friday on the 3rd).
+  const plans = leavePlans([{ date: '2026-04-01' }, { date: '2026-04-03' }], 2026);
+  assert.deepEqual(plans, [{ start: '2026-04-01', end: '2026-04-05', days: 5, leave: 1, leaveDates: ['2026-04-02'] }]);
+  const real = leavePlans(data.holidays, 2026);
+  assert.ok(real.length > 3);
+  for (const [i, p] of real.entries()) {
+    assert.ok(p.leave >= 1 && p.leave <= 3 && p.days / p.leave >= 2);
+    if (i) assert.ok(real[i - 1].end < p.start);
+  }
+  assert.ok(leavePlans(data.holidays, 2026, { from: '2026-12-01' }).every(p => p.end >= '2026-12-01'));
+});
+test('subscription feeds refresh daily and tag holiday types', () => {
+  const ics = createICS(data.holidays.filter(h => h.date === '2026-12-25'), data.fetchedAt, data.years, { name: 'Feed', feed: true });
+  assert.match(ics, /REFRESH-INTERVAL;VALUE=DURATION:P1D/);
+  assert.match(ics, /CATEGORIES:Public holiday,Bank holiday,Mercantile holiday/);
 });

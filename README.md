@@ -26,8 +26,12 @@ The project is maintained by [nooblk-98](https://github.com/nooblk-98), with hol
 - **Month, year, and list views** — browse one month, see the year at a glance, or search the full holiday list.
 - **Poya day highlights** — distinct colours and filters for Poya days and other public holidays.
 - **Upcoming holidays** — a next-holiday countdown and a short list of dates to look forward to.
+- **Bank and mercantile holidays** — each holiday shows whether it is also a bank or mercantile (private-sector) holiday, following the Central Bank of Sri Lanka's gazetted lists, with a Mercantile filter.
 - **Long weekend discovery** — breaks of three days or more, combining public holidays with Saturday–Sunday weekends without extra leave.
-- **Calendar downloads** — export a single holiday or a full year as an `.ics` file for your preferred calendar app.
+- **Leave planner** — suggests up to three leave days that bridge holidays and weekends into longer breaks, for all public holidays or mercantile holidays only.
+- **Live calendar subscriptions** — subscribe to [`/holidays.ics`](https://island-days.pages.dev/holidays.ics) or [`/holidays-mercantile.ics`](https://island-days.pages.dev/holidays-mercantile.ics) in Apple Calendar, Outlook or Google Calendar and receive updates automatically.
+- **Calendar downloads** — export a single holiday or a full year as a one-time `.ics` import.
+- **Search-friendly** — Open Graph and Twitter previews, `robots.txt`, `sitemap.xml`, and structured data for upcoming holidays. Set `SITE_URL` when building for another domain.
 - **Transparent data status** — last-checked dates, source links, estimate labels, and overdue-update notices.
 - **Responsive and accessible** — phone-friendly layouts, keyboard focus, accessible dialogs, reduced-motion support, and print styling.
 
@@ -44,4 +48,4 @@ Dates use **Asia/Colombo**, independently of the visitor’s browser timezone. P
 A static website with no frontend framework, database, visitor accounts, analytics, or external fonts.
 
 > [!NOTE]
-> Holiday dates may change. Years marked as estimates preserve the source’s status. Verify dates and working arrangements before booking. Calendar downloads are one-time imports, not live subscriptions.
+> Holiday dates may change. Years marked as estimates preserve the source’s status. Verify dates and working arrangements before booking. Downloads are one-time imports; use a subscription to receive changes. Bank and mercantile status comes from the holiday name, so a newly declared special holiday is shown as a public holiday only until it is classified.

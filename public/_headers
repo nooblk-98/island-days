@@ -7,3 +7,7 @@
   Cache-Control: public, max-age=0, must-revalidate
 /data/*
   Cache-Control: public, max-age=0, must-revalidate
+/*.ics
+  Content-Type: text/calendar; charset=utf-8
+  Cache-Control: public, max-age=3600
+  Access-Control-Allow-Origin: *
