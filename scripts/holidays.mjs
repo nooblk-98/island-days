@@ -27,7 +27,8 @@ export function parseCBSL(html, year) {
     const date = new Date(Date.UTC(year, month, Number(day)));
     if (month < 0 || date.getUTCMonth() !== month || date.getUTCDate() !== Number(day)) throw new Error(`Invalid date: ${text} ${year}`);
     if (date.toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' }) !== weekday) throw new Error(`Weekday mismatch: ${text} ${year}`);
-    const name = what[1].trim();
+    // "Ill" reads as the Roman numeral III in many fonts; use the usual spelling "Il" (Sinhala ඉල්).
+    const name = what[1].trim().replace(/^Ill(?= Full Moon)/, 'Il');
     if (!name || name.length > 200) throw new Error('Missing or invalid holiday name');
     const codes = what[2].replace(/[\s.]/g, '');
     rows++;

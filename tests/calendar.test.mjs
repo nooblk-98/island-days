@@ -126,3 +126,8 @@ test('reminder feeds add a day-before and week-before alert to every holiday', (
   assert.match(withAlerts, /TRIGGER:-P6DT15H/);
   assert.ok(withAlerts.split('\r\n').every(line => Buffer.byteLength(line) <= 75));
 });
+test('Il Poya is spelled so it cannot be read as the numeral III', () => {
+  const rows = parseCBSL(page(2026, 20, '<tr><td>November 24, Tuesday</td><td>Ill Full Moon Poya Day    B. P.</td></tr>'), 2026);
+  assert.ok(rows.some(r => r.name === 'Il Full Moon Poya Day' && r.id === '2026-11-24-il-full-moon-poya-day'));
+  assert.ok(!data.holidays.some(h => /^Ill /.test(h.name)));
+});

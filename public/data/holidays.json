@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "https://www.cbsl.gov.lk/",
-  "fetchedAt": "2026-11-13T13:39:20.783Z",
+  "fetchedAt": "2026-11-13T14:39:18.382Z",
   "years": {
     "2026": {
       "estimated": false,
@@ -221,9 +221,9 @@
       "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2026"
     },
     {
-      "id": "2026-11-24-ill-full-moon-poya-day",
+      "id": "2026-11-24-il-full-moon-poya-day",
       "date": "2026-11-24",
-      "name": "Ill Full Moon Poya Day",
+      "name": "Il Full Moon Poya Day",
       "type": "poya",
       "bank": true,
       "mercantile": false,
@@ -446,9 +446,9 @@
       "sourceUrl": "https://www.cbsl.gov.lk/en/about/about-the-bank/bank-holidays-2027"
     },
     {
-      "id": "2027-11-13-ill-full-moon-poya-day",
+      "id": "2027-11-13-il-full-moon-poya-day",
       "date": "2027-11-13",
-      "name": "Ill Full Moon Poya Day",
+      "name": "Il Full Moon Poya Day",
       "type": "poya",
       "bank": true,
       "mercantile": false,
