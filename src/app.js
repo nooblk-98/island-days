@@ -94,7 +94,7 @@ function breakDays() {
   return { weekends: spanDays(yourLongWeekends()), leave: spanDays(yourLeavePlans()) };
 }
 const isOff = date => isWeekend(date, weekendDays());
-const spanClass = (info, column, prefix) => info ? ` ${prefix}${info.first || column === 0 ? ` ${prefix}-start` : ''}${info.last || column === 6 ? ` ${prefix}-end` : ''}` : '';
+const spanClass = (info, column, prefix) => info ? ` ${prefix}${info.first || column === 0 ? ` ${prefix}-start` : ''}${info.last || column === 6 ? ` ${prefix}-end` : ''}${column === 0 && !info.first ? ` ${prefix}-wrap-in` : ''}${column === 6 && !info.last ? ` ${prefix}-wrap-out` : ''}` : '';
 const breakClass = (breaks, date, column) => spanClass(breaks.weekends.get(date), column, 'lw') + spanClass(breaks.leave.get(date), column, 'lp');
 function breakBadges(days, leave = 0) {
   return `<span class="break-metrics"><span class="break-metric off"><b>${days}</b> days off</span><span class="break-metric ${leave ? 'leave' : 'no-leave'}">${leave ? `<b>${leave}</b> leave day${leave === 1 ? '' : 's'}` : 'No leave needed'}</span></span>`;
@@ -142,13 +142,18 @@ function renderMonth() {
     const info = breaks.weekends.get(cell.date);
     const plan = breaks.leave.get(cell.date);
     const day = `cal-day${breakClass(breaks, cell.date, index % 7)}`;
+    const span = plan || info;
+    const wrapsIn = index % 7 === 0 && span && !span.first;
+    const wrapsOut = index % 7 === 6 && span && !span.last;
+    const spanLabel = span && (span.start.slice(0, 7) === span.end.slice(0, 7) ? `${Number(span.start.slice(-2))}–${Number(span.end.slice(-2))}` : `${shortDate(span.start)}–${shortDate(span.end)}`);
+    const continuation = wrapsIn || wrapsOut ? `<span class="break-wrap" aria-hidden="true" title="${esc(`Same break: ${shortDate(span.start)} – ${shortDate(span.end)}`)}">${wrapsIn ? '↳ ' : ''}${esc(spanLabel)}${wrapsOut ? ' ↴' : ''}</span>` : '';
     const cls = ['cal-dot', isOff(cell.date) && 'is-weekend', plan?.isLeave && 'is-leave', events.length && (events.some(h => h.type === 'poya') ? 'is-poya' : 'is-public'), events.some(isMercantile) && 'is-mercantile', isToday && 'is-today'].filter(Boolean).join(' ');
     const current = isToday ? ' aria-current="date"' : '';
     const breakNote = info ? `, part of a ${info.days}-day long weekend` : '';
-    if (plan?.isLeave) return `<div class="${day}"><button class="${cls}" data-break="${plan.start}"${current} aria-label="${esc(`Take leave on ${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${plan.days} days off for ${plan.leave} leave day${plan.leave === 1 ? '' : 's'}`)}">${cell.day}<span class="leave-badge" aria-hidden="true">Leave</span></button></div>`;
-    if (!events.length) return `<div class="${day}"><span class="${cls}"${current}${info ? ` title="${info.days}-day long weekend"` : ''}>${cell.day}</span></div>`;
+    if (plan?.isLeave) return `<div class="${day}"><button class="${cls}" data-break="${plan.start}"${current} aria-label="${esc(`Take leave on ${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${plan.days} days off for ${plan.leave} leave day${plan.leave === 1 ? '' : 's'}`)}">${cell.day}<span class="leave-badge" aria-hidden="true">Leave</span></button>${continuation}</div>`;
+    if (!events.length) return `<div class="${day}"><span class="${cls}"${current}${span ? ` title="${esc(`${span.days}-day break: ${shortDate(span.start)} – ${shortDate(span.end)}`)}"` : ''}>${cell.day}</span>${continuation}</div>`;
     const names = events.map(h => holidayDisplayName(h));
-    return `<div class="${day}"><button class="${cls}" data-date="${cell.date}"${current} aria-label="${esc(`${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${names.join(', ')}${breakNote}`)}">${cell.day}</button><span class="cal-name" aria-hidden="true">${esc(names.join(' · '))}</span></div>`;
+    return `<div class="${day}"><button class="${cls}" data-date="${cell.date}"${current} aria-label="${esc(`${formatDate(cell.date, { weekday: 'long', day: 'numeric', month: 'long' })}: ${names.join(', ')}${breakNote}`)}">${cell.day}</button><span class="cal-name" aria-hidden="true">${esc(names.join(' · '))}</span>${continuation}</div>`;
   }).join('');
   $('#calendar').innerHTML = `<div class="cal${prefs.saturday ? ' works-saturday' : ''}"><div class="cal-weekdays">${weekdays}</div><div class="cal-grid">${days}</div></div>${monthBreaks()}`;
 }

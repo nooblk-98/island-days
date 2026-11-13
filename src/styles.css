@@ -3497,3 +3497,20 @@ select:focus-visible {
 .sidebar .legend-group { grid-column: auto; grid-template-columns: minmax(0, 1fr); gap: 10px; align-content: start; }
 .sidebar .legend-group > span:not(.legend-label) { font-size: 12px; }
 #calendar > .calendar-bottom + .month-breaks { margin-top: 0; }
+/* A wrapped band stays open at the week edge; matching ranges join the two rows. */
+.cal .cal-day.lp::after { border-top-width: 2.5px; border-bottom-width: 2.5px; background: color-mix(in srgb, var(--break) 55%, transparent); }
+.cal .cal-day.lp-start::after { border-left-width: 2.5px; }
+.cal .cal-day.lp-end::after { border-right-width: 2.5px; }
+.cal .cal-day.lw::before { border-block: 3px solid var(--leave); }
+.cal .cal-day.lw-start::before { border-left: 3px solid var(--leave); }
+.cal .cal-day.lw-end::before { border-right: 3px solid var(--leave); }
+.cal .cal-day.lp-wrap-in::after, .cal .cal-day.lw-wrap-in::before { left: calc(var(--cal-gap) / -2); border-left: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.cal .cal-day.lp-wrap-out::after, .cal .cal-day.lw-wrap-out::before { right: calc(var(--cal-gap) / -2); border-right: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.cal-day.lp .cal-dot, .cal-day.lw .cal-dot { font-weight: 650; }
+.break-wrap { position: relative; z-index: 1; margin-top: 7px; color: var(--leave); font-size: 11px; font-weight: 650; line-height: 12px; white-space: nowrap; }
+.cal-day:has(.leave-badge) .break-wrap { margin-top: 10px; }
+.cal-day:has(.break-wrap) .cal-name { -webkit-line-clamp: 1; }
+.legend-group .lw-dot { border: 2px solid var(--leave); }
+@media (max-width: 600px) {
+  .break-wrap { font-size: 10px; margin-top: 7px; }
+}
