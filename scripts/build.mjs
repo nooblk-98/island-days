@@ -3,7 +3,7 @@ import { validateDataset } from './holidays.mjs';
 import { createICS, holidayClass, colomboToday, addDays } from '../src/calendar.js';
 const data = JSON.parse(await readFile(new URL('../public/data/holidays.json', import.meta.url), 'utf8'));
 validateDataset(data);
-const site = (process.env.SITE_URL || 'https://island-days.pages.dev').replace(/\/+$/, '');
+const site = (process.env.SITE_URL || 'https://dayoff.itsnooblk.com').replace(/\/+$/, '');
 const dist = new URL('../dist/', import.meta.url);
 await mkdir(dist, { recursive: true });
 await cp(new URL('../public/', import.meta.url), dist, { recursive: true });

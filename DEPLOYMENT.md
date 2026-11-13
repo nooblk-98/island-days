@@ -2,7 +2,7 @@
 
 Island Days is ready for Cloudflare Pages. The included data was fetched directly from https://publicholidays.lk/ on 13 November 2026. There are 76 holiday entries for 2026–2028. Multiple holidays may share a date. The source currently marks 2027 and 2028 as estimates; the website and calendar downloads preserve that label.
 
-The maintained calendar is live at **https://island-days.pages.dev/**. The repository is connected to Cloudflare Pages: pushes to `main` deploy the saved calendar, and monthly or manual runs refresh the source before deploying. The instructions below are a reference for setting up a separate deployment.
+The maintained calendar is live at **https://dayoff.itsnooblk.com/**. The repository is connected to Cloudflare Pages: pushes to `main` deploy the saved calendar, and monthly or manual runs refresh the source before deploying. The instructions below are a reference for setting up a separate deployment.
 
 ## Recommended: automatic monthly updates
 

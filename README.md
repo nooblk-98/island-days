@@ -5,7 +5,7 @@
   <p><strong>A little more time for life.</strong></p>
   <p>A thoughtfully designed public holiday calendar for Sri Lanka.<br>Find your next pause, explore Poya days, and make room for a longer break.</p>
 
-  <p><a href="https://island-days.pages.dev/"><strong>Explore the live calendar ↗</strong></a></p>
+  <p><a href="https://dayoff.itsnooblk.com/"><strong>Explore the live calendar ↗</strong></a></p>
 
   [![Calendar checks](https://github.com/nooblk-98/island-days/actions/workflows/update-and-deploy.yml/badge.svg)](https://github.com/nooblk-98/island-days/actions/workflows/update-and-deploy.yml)
   ![JavaScript](https://img.shields.io/badge/JavaScript-ES_modules-f2cc60?logo=javascript&logoColor=253c30)
@@ -29,7 +29,7 @@ The project is maintained by [nooblk-98](https://github.com/nooblk-98), with hol
 - **Bank and mercantile holidays** — each holiday shows whether it is also a bank or mercantile (private-sector) holiday, following the Central Bank of Sri Lanka's gazetted lists, with a Mercantile filter.
 - **Long weekend discovery** — breaks of three days or more, combining public holidays with Saturday–Sunday weekends without extra leave.
 - **Leave planner** — suggests up to three leave days that bridge holidays and weekends into longer breaks, for all public holidays or mercantile holidays only.
-- **Live calendar subscriptions** — subscribe to [`/holidays.ics`](https://island-days.pages.dev/holidays.ics) or [`/holidays-mercantile.ics`](https://island-days.pages.dev/holidays-mercantile.ics) in Apple Calendar, Outlook or Google Calendar and receive updates automatically.
+- **Live calendar subscriptions** — subscribe to [`/holidays.ics`](https://dayoff.itsnooblk.com/holidays.ics) or [`/holidays-mercantile.ics`](https://dayoff.itsnooblk.com/holidays-mercantile.ics) in Apple Calendar, Outlook or Google Calendar and receive updates automatically.
 - **Calendar downloads** — export a single holiday or a full year as a one-time `.ics` import.
 - **Search-friendly** — Open Graph and Twitter previews, `robots.txt`, `sitemap.xml`, and structured data for upcoming holidays. Set `SITE_URL` when building for another domain.
 - **Transparent data status** — last-checked dates, source links, estimate labels, and overdue-update notices.
