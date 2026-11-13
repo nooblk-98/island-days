@@ -7,7 +7,8 @@ http.createServer(async (req, res) => {
   const path = resolve(root, `.${decodeURIComponent(new URL(req.url, 'http://localhost').pathname)}`);
   if (path !== root && !path.startsWith(root + sep)) { res.writeHead(403).end(); return; }
   try {
-    const file = path === root ? resolve(root, 'index.html') : path;
+    // Like Cloudflare Pages: a folder serves its index.html.
+    const file = path === root || req.url.split('?')[0].endsWith('/') ? resolve(path, 'index.html') : path;
     const content = await readFile(file);
     res.writeHead(200, { 'Content-Type': `${mime[extname(file)] || 'application/octet-stream'}; charset=utf-8`, 'Cache-Control': 'no-store' });
     res.end(content);
