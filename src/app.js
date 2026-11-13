@@ -160,7 +160,6 @@ function render() {
   const amount = state.view === 'month' ? monthSelected.length : selected.length;
   $('#month-count').textContent = `${amount} holiday${amount === 1 ? '' : 's'}`;
   $('#estimate-note').hidden = !isEstimated(state.year);
-  $('#holiday-scope-note').hidden = state.filter !== 'mercantile';
   $('#month-view').classList.toggle('selected', state.view === 'month');
   $('#list-view').classList.toggle('selected', state.view === 'list');
   $('#month-view').setAttribute('aria-pressed', state.view === 'month');
