@@ -3533,3 +3533,36 @@ select:focus-visible {
 .cal .cal-day.lp-wrap-out::after { border-right: 2.5px dashed var(--leave); }
 .cal .cal-day.lw-wrap-in::before { border-left: 3px solid var(--leave); }
 .cal .cal-day.lw-wrap-out::before { border-right: 3px solid var(--leave); }
+
+/* Holiday names sit clear of the break band's outline (band reaches 4px below the circle). */
+.cal .cal-name { margin-top: 10px; }
+
+/* Bigger touch areas for small text links and the search field, without changing their look. */
+.search input { height: 100%; }
+@media (max-width: 600px) {
+  .data-line a, .maker-text a, .link-button, .footer-years a {
+    display: inline-block;
+    padding: 9px 0;
+    margin: -9px 0;
+  }
+}
+
+/* Phones and tablets: show the whole holiday list instead of a scroll box inside the page. */
+@media (max-width: 900px) {
+  .holiday-list { max-height: none; overflow: visible; }
+}
+@media (max-width: 600px) {
+  .dialog-source, .feed-link {
+    display: inline-block;
+    padding: 9px 0;
+    margin: -9px 0;
+  }
+  .plan-row .feed-link { margin: -5px 0; }
+}
+@media (max-width: 600px) {
+  .dialog .dialog-source, dialog .dialog-source { margin: 4px 0 0; padding: 10px 0; }
+  dialog .plan-row .feed-link { padding: 9px 0; margin: -3px 0 -9px; }
+}
+@media (max-width: 600px) {
+  .footer-bottom a { display: inline-block; padding: 9px 0; margin: -9px 0; }
+}
