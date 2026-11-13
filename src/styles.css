@@ -61,3 +61,6 @@ footer{flex-wrap:wrap}.footer-credit{width:100%;display:flex;flex-wrap:wrap;alig
 [data-theme="dark"] .footer-credit a{color:#b7c8a9}[data-theme="dark"] .star-link{background:#18211b;border-color:#33402f}
 .upcoming-item>span:nth-child(2){flex:1;min-width:0}.holiday-list .upcoming-arrow{margin-left:0}.list-type{margin-left:0;flex:none;width:96px;text-align:center}
 @media(max-width:600px){.list-type{width:auto}}
+.footer-credit{width:auto;padding:0 0 0 19px;border-top:0;border-left:1px solid var(--line);font-size:10px}
+@media(max-width:900px){.footer-credit{width:100%;padding:0;border-left:0}}
+@media(max-width:600px){.footer-credit{order:3}.footer-note{order:4}}
