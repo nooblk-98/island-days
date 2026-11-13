@@ -1,4 +1,5 @@
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { validateDataset } from './holidays.mjs';
 import { createICS, holidayClass, formatDate, longWeekends } from '../src/calendar.js';
 const data = JSON.parse(await readFile(new URL('../public/data/holidays.json', import.meta.url), 'utf8'));
@@ -139,4 +140,15 @@ ${weekendRows || '      <li>No long weekends this year.</li>'}
 await writeFile(new URL('robots.txt', dist), `User-agent: *\nAllow: /\n\nSitemap: ${site}/sitemap.xml\n`);
 const urls = [{ loc: `${site}/`, priority: '1.0' }, ...years.map(y => ({ loc: `${site}${yearPath(y)}`, priority: '0.8' }))];
 await writeFile(new URL('sitemap.xml', dist), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `  <url><loc>${u.loc}</loc><lastmod>${lastmod}</lastmod><changefreq>monthly</changefreq><priority>${u.priority}</priority></url>`).join('\n')}\n</urlset>\n`);
+// Cache busting: Cloudflare may keep CSS and JS in browsers for hours, so every asset link carries a
+// fingerprint of the file's content. A deploy changes the fingerprint and visitors fetch the new file at once.
+const fingerprint = async path => createHash('sha256').update(await readFile(new URL(path, dist))).digest('hex').slice(0, 10);
+const rewrite = async (path, pairs) => { let text = await readFile(new URL(path, dist), 'utf8'); for (const [from, to] of pairs) text = text.replaceAll(from, to); await writeFile(new URL(path, dist), text); };
+const calendarV = await fingerprint('calendar.js');
+await rewrite('app.js', [["from './calendar.js'", `from './calendar.js?v=${calendarV}'`]]);
+await rewrite('widget/widget.js', [["from '/calendar.js'", `from '/calendar.js?v=${calendarV}'`]]);
+const assets = {};
+for (const file of ['styles.css', 'theme.js', 'app.js', 'widget/widget.css', 'widget/widget.js']) assets[file] = await fingerprint(file);
+const htmlPages = ['index.html', '404.html', 'widget/index.html', ...years.map(y => `sri-lanka-holidays-${y}/index.html`)];
+for (const page of htmlPages) await rewrite(page, Object.entries(assets).map(([file, v]) => [`"/${file}"`, `"/${file}?v=${v}"`]));
 console.log(`Built Island Days with ${data.holidays.length} holidays across ${years.join(', ')} for ${site}, plus ${years.length} yearly pages.`);
